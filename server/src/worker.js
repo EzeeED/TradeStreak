@@ -12,7 +12,8 @@ function serveAsset(file, request, immutable) {
     'cache-control': immutable ? 'public, max-age=31536000, immutable' : 'no-cache',
     'x-content-type-options': 'nosniff',
   };
-  return new Response(request.method === 'HEAD' ? null : file.body, { headers });
+  const body = file.b64 ? Uint8Array.from(atob(file.b64), (ch) => ch.charCodeAt(0)) : file.body;
+  return new Response(request.method === 'HEAD' ? null : body, { headers });
 }
 
 export default {

@@ -5,21 +5,21 @@ import { money, date, pct } from '../lib/format.js';
 // además el signo +/− y la dirección de la barra codifican lo mismo.
 export const WIN = '#34d399';
 export const LOSS = '#e11d48';
-export const BRAND = '#a78bfa';
-const GRID = '#1e2740';
-const AXIS = { stroke: '#8a94ad', fontSize: 11, tickLine: false, axisLine: false };
+export const BRAND = '#f21d38';
+const GRID = '#1f1f23';
+const AXIS = { stroke: '#8e8e98', fontSize: 11, tickLine: false, axisLine: false };
 
 function TooltipBox({ title, rows }) {
   return (
-    <div className="rounded-xl border border-line bg-panel-2 px-3 py-2 text-xs shadow-xl">
-      <div className="mb-1 font-medium text-slate-300">{title}</div>
+    <div className="rounded-xl border border-white/[0.08] bg-[#121214]/95 px-3 py-2 text-xs shadow-xl shadow-black/60 backdrop-blur">
+      <div className="mb-1 font-medium text-zinc-300">{title}</div>
       {rows.map(([label, value, swatch]) => (
         <div key={label} className="flex items-center justify-between gap-4">
           <span className="flex items-center gap-1.5 text-muted">
             {swatch && <span className="h-2 w-2 rounded-full" style={{ background: swatch }} />}
             {label}
           </span>
-          <span className="font-semibold tabular-nums text-slate-100">{value}</span>
+          <span className="font-semibold tabular-nums text-zinc-100">{value}</span>
         </div>
       ))}
     </div>
@@ -43,9 +43,9 @@ export function EquityChart({ data, currency, height = 260 }) {
         <CartesianGrid stroke={GRID} vertical={false} />
         <XAxis dataKey="time" tickFormatter={shortDate} minTickGap={40} {...AXIS} />
         <YAxis tickFormatter={(v) => money(v, currency, { compact: true })} width={72} {...AXIS} />
-        <ReferenceLine y={0} stroke="#3a4560" />
+        <ReferenceLine y={0} stroke="#34343a" />
         <Tooltip
-          cursor={{ stroke: '#64748b', strokeDasharray: '3 3' }}
+          cursor={{ stroke: '#52525b', strokeDasharray: '3 3' }}
           content={({ active, payload }) =>
             active && payload?.length ? (
               <TooltipBox
@@ -58,7 +58,7 @@ export function EquityChart({ data, currency, height = 260 }) {
             ) : null
           }
         />
-        <Area type="monotone" dataKey="pnl" stroke={color} strokeWidth={2} fill="url(#eq)" dot={false} activeDot={{ r: 4, strokeWidth: 2, stroke: '#111729' }} />
+        <Area type="monotone" dataKey="pnl" stroke={color} strokeWidth={2} fill="url(#eq)" dot={false} activeDot={{ r: 4, strokeWidth: 2, stroke: '#0e0e10' }} />
       </AreaChart>
     </ResponsiveContainer>
   );
@@ -72,9 +72,9 @@ export function PnlBars({ data, xKey, currency, height = 240, labelFormatter = (
         <CartesianGrid stroke={GRID} vertical={false} />
         <XAxis dataKey={xKey} tickFormatter={labelFormatter} minTickGap={12} {...AXIS} />
         <YAxis tickFormatter={(v) => money(v, currency, { compact: true })} width={72} {...AXIS} />
-        <ReferenceLine y={0} stroke="#3a4560" />
+        <ReferenceLine y={0} stroke="#34343a" />
         <Tooltip
-          cursor={{ fill: 'rgba(167,139,250,0.08)' }}
+          cursor={{ fill: 'rgba(225,15,43,0.08)' }}
           content={({ active, payload }) => {
             if (!active || !payload?.length) return null;
             const p = payload[0].payload;
@@ -114,7 +114,7 @@ export function ScoreRadar({ factors, height = 230 }) {
     <ResponsiveContainer width="100%" height={height}>
       <RadarChart data={data} outerRadius="72%">
         <PolarGrid stroke={GRID} />
-        <PolarAngleAxis dataKey="factor" tick={{ fill: '#8a94ad', fontSize: 11 }} />
+        <PolarAngleAxis dataKey="factor" tick={{ fill: '#8e8e98', fontSize: 11 }} />
         <Tooltip content={({ active, payload }) => (active && payload?.length ? <TooltipBox title={payload[0].payload.factor} rows={[['Puntuación', `${payload[0].value}/100`, BRAND]]} /> : null)} />
         <Radar dataKey="value" stroke={BRAND} strokeWidth={2} fill={BRAND} fillOpacity={0.25} dot={{ r: 3, fill: BRAND }} />
       </RadarChart>

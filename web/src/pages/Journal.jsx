@@ -125,7 +125,7 @@ export default function Journal() {
             ))}
           </ul>
         ) : (
-          <div className="flex flex-col items-center px-5 py-10 text-center text-sm text-muted"><NotebookPen className="mb-2 text-violet-300" />Escribe tu primera entrada del diario.</div>
+          <div className="flex flex-col items-center px-5 py-10 text-center text-sm text-muted"><NotebookPen className="mb-2 text-crimson-300" />Escribe tu primera entrada del diario.</div>
         )}
       </Card>
     </div>

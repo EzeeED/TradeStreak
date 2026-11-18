@@ -35,7 +35,7 @@ export default function Layout() {
           onClick={() => setOpen(false)}
           className={({ isActive }) =>
             cx('flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition',
-              isActive ? 'bg-brand/15 text-white ring-1 ring-brand/30' : 'text-slate-400 hover:bg-panel-2 hover:text-slate-200')
+              isActive ? 'relative bg-gradient-to-r from-crimson-600/25 to-transparent text-white before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-crimson-500' : 'text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-100')
           }
         >
           <Icon size={18} />
@@ -46,8 +46,8 @@ export default function Layout() {
   );
 
   const userBox = (
-    <div className="mt-6 flex items-center gap-3 rounded-xl border border-line bg-panel-2/50 p-3">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-emerald-500 text-sm font-semibold">
+    <div className="mt-6 flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] p-3">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-crimson-500 to-crimson-900 text-sm font-semibold">
         {user?.name?.[0]?.toUpperCase()}
       </div>
       <div className="min-w-0 flex-1">
@@ -62,7 +62,7 @@ export default function Layout() {
 
   return (
     <div className="flex min-h-full">
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-line bg-panel/60 p-4 lg:flex">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-white/[0.06] bg-black/40 p-4 backdrop-blur lg:flex">
         <div className="mb-8 px-2 pt-1"><Logo /></div>
         {nav}
         {userBox}
@@ -82,15 +82,15 @@ export default function Layout() {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex flex-wrap items-center gap-3 border-b border-line bg-bg/85 px-4 py-3 backdrop-blur sm:px-8">
-          <button className="rounded-lg p-1.5 text-slate-300 hover:bg-panel-2 lg:hidden" onClick={() => setOpen(true)} aria-label="Abrir menú"><Menu /></button>
-          <h1 className="mr-auto text-lg font-semibold">{title}</h1>
+        <header className="sticky top-0 z-30 flex flex-wrap items-center gap-3 border-b border-white/[0.06] bg-bg/70 px-4 py-3 backdrop-blur-xl sm:px-8">
+          <button className="rounded-lg p-1.5 text-zinc-300 hover:bg-panel-2 lg:hidden" onClick={() => setOpen(true)} aria-label="Abrir menú"><Menu /></button>
+          <h1 className="mr-auto text-xl font-semibold">{title}</h1>
           {showFilters && (
             <div className="flex w-full flex-wrap gap-2 sm:w-auto">
               <select
                 value={accountId}
                 onChange={(e) => setAccountId(e.target.value)}
-                className="min-w-0 flex-1 rounded-xl border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-brand sm:flex-none"
+                className="min-w-0 flex-1 rounded-xl border border-white/[0.08] bg-panel/80 px-3 py-2 text-sm outline-none transition hover:border-crimson-500/40 focus:border-brand sm:flex-none"
                 aria-label="Cuenta"
               >
                 <option value="all">Todas las cuentas</option>
@@ -99,7 +99,7 @@ export default function Layout() {
               <select
                 value={range}
                 onChange={(e) => setRange(e.target.value)}
-                className="min-w-0 flex-1 rounded-xl border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-brand sm:flex-none"
+                className="min-w-0 flex-1 rounded-xl border border-white/[0.08] bg-panel/80 px-3 py-2 text-sm outline-none transition hover:border-crimson-500/40 focus:border-brand sm:flex-none"
                 aria-label="Periodo"
               >
                 {RANGES.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}

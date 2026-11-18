@@ -1,27 +1,61 @@
 @import "tailwindcss";
 
+/* Paleta premium rojo / negro */
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --color-bg: #0a0e1a;
-  --color-panel: #111729;
-  --color-panel-2: #172036;
-  --color-line: #232d47;
-  --color-muted: #8a94ad;
-  --color-brand: #8b5cf6;
+  --font-display: "Sora", "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --color-bg: #060607;
+  --color-panel: #0e0e10;
+  --color-panel-2: #18181b;
+  --color-line: #232327;
+  --color-muted: #8e8e98;
+  --color-brand: #e10f2b;          /* rojo carmesí de marca */
   --color-win: #34d399;
-  --color-loss: #fb7185;
+  --color-loss: #ff5a6e;
+
+  --color-crimson-50: #fff1f2;
+  --color-crimson-100: #ffe0e3;
+  --color-crimson-200: #ffc2c8;
+  --color-crimson-300: #ff8f9b;
+  --color-crimson-400: #ff4d61;
+  --color-crimson-500: #f21d38;
+  --color-crimson-600: #e10f2b;
+  --color-crimson-700: #b80a22;
+  --color-crimson-800: #8c0a1d;
+  --color-crimson-900: #5c0714;
+  --color-crimson-950: #2a0309;
 }
 
 html, body, #root { height: 100%; }
 body {
-  background: var(--color-bg);
-  color: #e6e9f2;
+  background:
+    radial-gradient(1200px 600px at 85% -10%, rgba(225, 15, 43, 0.13), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(225, 15, 43, 0.07), transparent 60%),
+    var(--color-bg);
+  background-attachment: fixed;
+  color: #ededf0;
   -webkit-font-smoothing: antialiased;
-  font-feature-settings: "tnum" 1;
+  font-feature-settings: "tnum" 1, "cv11" 1;
 }
+h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0.01em; }
+
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: #232d47; border-radius: 8px; }
+::-webkit-scrollbar-thumb { background: #26262b; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #3a1018; }
 ::-webkit-scrollbar-track { background: transparent; }
+::selection { background: rgba(225, 15, 43, 0.45); }
 
 input, select, textarea { color-scheme: dark; }
-.recharts-tooltip-cursor { fill: rgba(139, 92, 246, 0.08); }
+
+/* Superficie "cristal" premium: degradado sutil + brillo superior */
+.glass {
+  background: linear-gradient(180deg, rgba(24, 24, 27, 0.78), rgba(12, 12, 14, 0.86));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045), 0 20px 40px -24px rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(14px);
+}
+.glow-red { box-shadow: 0 0 0 1px rgba(255, 77, 97, 0.35), 0 10px 30px -10px rgba(225, 15, 43, 0.65); }
+.text-gradient-red {
+  background: linear-gradient(90deg, #ff4d61, #e10f2b 55%, #b80a22);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}

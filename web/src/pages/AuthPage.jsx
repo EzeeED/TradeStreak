@@ -35,18 +35,18 @@ export default function AuthPage({ mode }) {
 
   return (
     <div className="grid min-h-full lg:grid-cols-2">
-      <div className="relative hidden overflow-hidden border-r border-line bg-panel lg:flex lg:flex-col lg:justify-between lg:p-12">
-        <div className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-violet-600/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-40 -right-20 h-96 w-96 rounded-full bg-emerald-600/15 blur-3xl" />
+      <div className="relative hidden overflow-hidden border-r border-white/[0.06] lg:flex lg:flex-col lg:justify-between lg:p-12" style={{ background: "radial-gradient(800px 500px at 0% 0%, rgba(225,15,43,0.22), transparent 60%), linear-gradient(160deg, #0f0f11, #060607)" }}>
+        <div className="pointer-events-none absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)", backgroundSize: "48px 48px", maskImage: "radial-gradient(circle at 30% 40%, black, transparent 70%)" }} />
+        <div className="pointer-events-none absolute -bottom-40 -right-20 h-96 w-96 rounded-full bg-crimson-700/25 blur-3xl" />
         <Logo size={34} />
         <div className="relative">
           <h2 className="max-w-md text-4xl font-bold leading-tight tracking-tight">
-            El diario de trading que convierte tus datos de <span className="text-emerald-400">MT5</span> en disciplina.
+            El diario de trading que convierte tus datos de <span className="text-gradient-red">MT5</span> en disciplina.
           </h2>
           <div className="mt-10 space-y-6">
             {FEATURES.map(({ icon: Icon, title, text }) => (
               <div key={title} className="flex gap-4">
-                <div className="rounded-xl bg-panel-2 p-2.5 text-violet-300 ring-1 ring-line"><Icon size={20} /></div>
+                <div className="rounded-xl bg-crimson-600/15 p-2.5 text-crimson-400 ring-1 ring-crimson-500/30"><Icon size={20} /></div>
                 <div>
                   <div className="font-semibold">{title}</div>
                   <div className="text-sm text-muted">{text}</div>
@@ -62,7 +62,7 @@ export default function AuthPage({ mode }) {
         <form onSubmit={submit} className="w-full max-w-sm space-y-5">
           <div className="mb-8 lg:hidden"><Logo size={34} /></div>
           <div>
-            <h1 className="text-2xl font-bold">{isLogin ? 'Bienvenido de vuelta' : 'Crea tu cuenta'}</h1>
+            <h1 className="text-3xl font-bold">{isLogin ? 'Bienvenido de vuelta' : 'Crea tu cuenta'}</h1>
             <p className="mt-1 text-sm text-muted">{isLogin ? 'Entra para ver tu rendimiento.' : 'Empieza a registrar tus trades en minutos.'}</p>
           </div>
           <ErrorBox error={error} />
@@ -76,7 +76,7 @@ export default function AuthPage({ mode }) {
           <Button type="submit" loading={loading} className="w-full py-2.5">{isLogin ? 'Entrar' : 'Crear cuenta'}</Button>
           <p className="text-center text-sm text-muted">
             {isLogin ? '¿No tienes cuenta? ' : '¿Ya tienes cuenta? '}
-            <Link to={isLogin ? '/register' : '/login'} className="font-medium text-violet-300 hover:text-violet-200">
+            <Link to={isLogin ? '/register' : '/login'} className="font-medium text-crimson-300 hover:text-crimson-200">
               {isLogin ? 'Regístrate' : 'Inicia sesión'}
             </Link>
           </p>

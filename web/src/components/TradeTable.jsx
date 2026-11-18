@@ -48,7 +48,7 @@ export default function TradeTable({ trades, sort, dir, onSort, compact }) {
               onClick={() => navigate(`/trades/${t.id}`)}
               className="cursor-pointer border-b border-line/60 transition last:border-0 hover:bg-panel-2/60"
             >
-              <td className="whitespace-nowrap px-4 py-3 text-slate-300">
+              <td className="whitespace-nowrap px-4 py-3 text-zinc-300">
                 <Link to={`/trades/${t.id}`} onClick={(e) => e.stopPropagation()} className="hover:text-white">{dateTime(t.close_time || t.open_time)}</Link>
                 {t.status === 'open' && <Badge tone="warn" className="ml-2">Abierto</Badge>}
               </td>
@@ -57,9 +57,9 @@ export default function TradeTable({ trades, sort, dir, onSort, compact }) {
               <td className="px-4 py-3 text-right tabular-nums">{num(t.volume)}</td>
               {!compact && (
                 <>
-                  <td className="hidden px-4 py-3 text-right tabular-nums text-slate-300 md:table-cell">{price(t.entry_price)}</td>
-                  <td className="hidden px-4 py-3 text-right tabular-nums text-slate-300 md:table-cell">{price(t.exit_price)}</td>
-                  <td className="hidden px-4 py-3 text-right text-slate-300 md:table-cell">{duration(t.duration_sec)}</td>
+                  <td className="hidden px-4 py-3 text-right tabular-nums text-zinc-300 md:table-cell">{price(t.entry_price)}</td>
+                  <td className="hidden px-4 py-3 text-right tabular-nums text-zinc-300 md:table-cell">{price(t.exit_price)}</td>
+                  <td className="hidden px-4 py-3 text-right text-zinc-300 md:table-cell">{duration(t.duration_sec)}</td>
                   <td className="hidden px-4 py-3 md:table-cell">
                     <div className="flex flex-wrap items-center gap-1">
                       {t.setup && <Badge tone="brand">{t.setup}</Badge>}

@@ -36,7 +36,7 @@ export default function MonthCalendar({ month, onMonthChange, daily, currency, o
           <button onClick={() => shift(1)} className="rounded-lg p-1.5 text-muted hover:bg-panel-2 hover:text-white" aria-label="Mes siguiente"><ChevronRight size={18} /></button>
         </div>
         <div className="text-sm text-muted">
-          Mes: <span className={cx('font-semibold tabular-nums', monthPnl > 0 ? 'text-win' : monthPnl < 0 ? 'text-loss' : 'text-slate-300')}>{money(monthPnl, currency, { sign: true })}</span>
+          Mes: <span className={cx('font-semibold tabular-nums', monthPnl > 0 ? 'text-win' : monthPnl < 0 ? 'text-loss' : 'text-zinc-300')}>{money(monthPnl, currency, { sign: true })}</span>
           <span className="ml-2">· {monthDays.length} días</span>
         </div>
       </div>
@@ -60,22 +60,22 @@ export default function MonthCalendar({ month, onMonthChange, daily, currency, o
                   style={{ background: bg }}
                   title={d ? `${day}: ${money(d.pnl, currency, { sign: true })} · ${d.trades} trades` : day}
                   className={cx(
-                    'flex flex-col rounded-xl border p-1.5 text-left transition hover:border-slate-400 sm:p-2',
+                    'flex flex-col rounded-xl border p-1.5 text-left transition hover:border-zinc-400 sm:p-2',
                     compact ? 'min-h-14' : 'min-h-16 sm:min-h-24',
-                    selected === day ? 'border-brand ring-1 ring-brand' : d ? (d.pnl >= 0 ? 'border-emerald-500/30' : 'border-rose-500/30') : 'border-line bg-bg/40',
+                    selected === day ? 'border-brand ring-1 ring-brand' : d ? (d.pnl >= 0 ? 'border-emerald-500/30' : 'border-rose-500/30') : 'border-white/[0.05] bg-white/[0.015]',
                   )}
                 >
-                  <span className={cx('text-xs', day === today ? 'rounded bg-brand px-1 font-semibold text-white' : 'text-muted')}>{Number(day.slice(8))}</span>
+                  <span className={cx('text-xs', day === today ? 'rounded bg-gradient-to-b from-crimson-500 to-crimson-700 px-1.5 font-semibold text-white' : 'text-muted')}>{Number(day.slice(8))}</span>
                   {d && (
                     <span className="mt-auto">
                       <span className="block truncate text-[11px] font-semibold tabular-nums text-white sm:text-xs lg:text-sm">{compact ? shortMoney(d.pnl) : money(d.pnl, currency, { sign: true, compact: true })}</span>
-                      {!compact && <span className="hidden text-[11px] text-slate-300 sm:block">{d.trades} trade{d.trades !== 1 ? 's' : ''} · {Math.round((d.wins / d.trades) * 100)}%</span>}
+                      {!compact && <span className="hidden text-[11px] text-zinc-300 sm:block">{d.trades} trade{d.trades !== 1 ? 's' : ''} · {Math.round((d.wins / d.trades) * 100)}%</span>}
                     </span>
                   )}
                 </button>
               );
             }),
-            <div key={`w${wi}`} className={cx('hidden flex-col justify-center rounded-xl border border-line bg-panel-2/50 p-2 text-center sm:flex', compact ? 'min-h-14' : 'min-h-24')}>
+            <div key={`w${wi}`} className={cx('hidden flex-col justify-center rounded-xl border border-white/[0.05] bg-white/[0.03] p-2 text-center sm:flex', compact ? 'min-h-14' : 'min-h-24')}>
               <span className="text-[11px] text-muted">S{wi + 1}</span>
               <span className={cx('text-sm font-semibold tabular-nums', wPnl > 0 ? 'text-win' : wPnl < 0 ? 'text-loss' : 'text-muted')}>{wDays.length ? (compact ? shortMoney(wPnl) : money(wPnl, currency, { sign: true, compact: true })) : '—'}</span>
               {wDays.length > 0 && !compact && <span className="text-[11px] text-muted">{wDays.length} días</span>}

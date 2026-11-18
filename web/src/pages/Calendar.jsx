@@ -30,7 +30,7 @@ export default function Calendar() {
           action={
             <div className="flex items-center gap-4 text-sm">
               {d && <span className={cx('font-semibold', pnlColor(d.pnl))}>{money(d.pnl, currency, { sign: true })}</span>}
-              <Link to={`/journal?date=${day}`} className="text-violet-300 hover:text-violet-200">Abrir diario →</Link>
+              <Link to={`/journal?date=${day}`} className="text-crimson-300 hover:text-crimson-200">Abrir diario →</Link>
             </div>
           }
         >

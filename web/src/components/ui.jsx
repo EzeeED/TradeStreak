@@ -5,10 +5,10 @@ export const cx = (...c) => c.filter(Boolean).join(' ');
 
 export function Card({ className, children, title, action, padded = true }) {
   return (
-    <section className={cx('rounded-2xl border border-line bg-panel', className)}>
+    <section className={cx('glass rounded-2xl border border-white/[0.06]', className)}>
       {(title || action) && (
-        <header className="flex items-center justify-between gap-3 border-b border-line px-5 py-3.5">
-          <h3 className="text-sm font-semibold text-slate-200">{title}</h3>
+        <header className="flex items-center justify-between gap-3 border-b border-white/[0.06] px-5 py-3.5">
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-zinc-100"><span className="h-3.5 w-1 rounded-full bg-gradient-to-b from-crimson-400 to-crimson-700" />{title}</h3>
           {action}
         </header>
       )}
@@ -19,22 +19,22 @@ export function Card({ className, children, title, action, padded = true }) {
 
 export function Stat({ label, value, hint, tone, icon: Icon, className }) {
   return (
-    <div className={cx('rounded-2xl border border-line bg-panel p-4', className)}>
+    <div className={cx('glass rounded-2xl border border-white/[0.06] p-4', className)}>
       <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted">
-        {Icon && <Icon size={14} />}
+        {Icon && <span className="rounded-md bg-crimson-600/15 p-1 text-crimson-400 ring-1 ring-crimson-500/20"><Icon size={13} /></span>}
         {label}
       </div>
-      <div className={cx('mt-2 text-2xl font-semibold tabular-nums', tone)}>{value}</div>
+      <div className={cx('font-display mt-2 text-2xl font-semibold tabular-nums', tone)}>{value}</div>
       {hint && <div className="mt-1 text-xs text-muted">{hint}</div>}
     </div>
   );
 }
 
 const variants = {
-  primary: 'bg-brand text-white hover:bg-violet-500 shadow-lg shadow-violet-900/30',
-  secondary: 'bg-panel-2 text-slate-200 border border-line hover:border-slate-500',
-  ghost: 'text-slate-300 hover:bg-panel-2',
-  danger: 'bg-rose-600/15 text-rose-300 border border-rose-500/30 hover:bg-rose-600/25',
+  primary: 'bg-gradient-to-b from-crimson-500 to-crimson-700 text-white hover:from-crimson-400 hover:to-crimson-600 glow-red',
+  secondary: 'bg-panel-2/80 text-zinc-200 border border-line hover:border-crimson-500/50 hover:text-white',
+  ghost: 'text-zinc-300 hover:bg-panel-2',
+  danger: 'bg-transparent text-crimson-300 border border-crimson-500/30 hover:bg-crimson-600/15',
 };
 
 export function Button({ variant = 'primary', loading, className, children, icon: Icon, ...props }) {
@@ -57,7 +57,7 @@ export function Button({ variant = 'primary', loading, className, children, icon
 export function Field({ label, hint, error, children }) {
   return (
     <label className="block">
-      {label && <span className="mb-1.5 block text-sm font-medium text-slate-300">{label}</span>}
+      {label && <span className="mb-1.5 block text-sm font-medium text-zinc-300">{label}</span>}
       {children}
       {hint && !error && <span className="mt-1 block text-xs text-muted">{hint}</span>}
       {error && <span className="mt-1 block text-xs text-loss">{error}</span>}
@@ -66,7 +66,7 @@ export function Field({ label, hint, error, children }) {
 }
 
 export const inputClass =
-  'w-full rounded-xl border border-line bg-bg px-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/25';
+  'w-full rounded-xl border border-white/[0.08] bg-black/40 px-3.5 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/25';
 
 export const Input = (props) => <input {...props} className={cx(inputClass, props.className)} />;
 export const Select = ({ children, ...props }) => (
@@ -85,7 +85,7 @@ export function Modal({ open, onClose, title, children, wide }) {
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm sm:p-10" onMouseDown={onClose}>
       <div
-        className={cx('w-full rounded-2xl border border-line bg-panel shadow-2xl', wide ? 'max-w-3xl' : 'max-w-lg')}
+        className={cx('w-full rounded-2xl border border-white/[0.08] bg-panel shadow-2xl shadow-crimson-950/50', wide ? 'max-w-3xl' : 'max-w-lg')}
         onMouseDown={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -102,10 +102,10 @@ export function Modal({ open, onClose, title, children, wide }) {
 
 export function Badge({ children, tone = 'default', className }) {
   const tones = {
-    default: 'bg-panel-2 text-slate-300 border-line',
+    default: 'bg-panel-2 text-zinc-300 border-line',
     win: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/25',
     loss: 'bg-rose-500/10 text-rose-300 border-rose-500/25',
-    brand: 'bg-violet-500/10 text-violet-300 border-violet-500/25',
+    brand: 'bg-crimson-600/15 text-crimson-200 border-crimson-500/30',
     warn: 'bg-amber-500/10 text-amber-300 border-amber-500/25',
   };
   return <span className={cx('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium', tones[tone], className)}>{children}</span>;
@@ -114,7 +114,7 @@ export function Badge({ children, tone = 'default', className }) {
 export function Empty({ icon: Icon, title, children, action }) {
   return (
     <div className="flex flex-col items-center justify-center px-6 py-14 text-center">
-      {Icon && <div className="mb-4 rounded-2xl bg-panel-2 p-4 text-brand"><Icon size={28} /></div>}
+      {Icon && <div className="mb-4 rounded-2xl bg-crimson-600/10 p-4 text-crimson-400 ring-1 ring-crimson-500/25"><Icon size={28} /></div>}
       <h3 className="text-base font-semibold">{title}</h3>
       {children && <p className="mt-1 max-w-md text-sm text-muted">{children}</p>}
       {action && <div className="mt-5">{action}</div>}
@@ -151,7 +151,7 @@ export function TagInput({ value, onChange, suggestions = [], placeholder }) {
       <input
         list={suggestions.length ? 'tag-suggestions' : undefined}
         placeholder={value.length ? '' : placeholder}
-        className="min-w-24 flex-1 bg-transparent outline-none placeholder:text-slate-500"
+        className="min-w-24 flex-1 bg-transparent outline-none placeholder:text-zinc-500"
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ',') {
             e.preventDefault();

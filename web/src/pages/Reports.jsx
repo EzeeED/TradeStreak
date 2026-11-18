@@ -21,8 +21,8 @@ function BreakdownTable({ rows, currency, label }) {
           {rows.map((r) => (
             <tr key={r.key} className="border-b border-line/50 last:border-0">
               <td className="py-2 pr-4 font-medium">{r.label ?? r.key}</td>
-              <td className="py-2 pr-4 text-right tabular-nums text-slate-300">{r.trades}</td>
-              <td className="py-2 pr-4 text-right tabular-nums text-slate-300">{pct(r.winRate)}</td>
+              <td className="py-2 pr-4 text-right tabular-nums text-zinc-300">{r.trades}</td>
+              <td className="py-2 pr-4 text-right tabular-nums text-zinc-300">{pct(r.winRate)}</td>
               <td className={cx('py-2 text-right font-semibold tabular-nums', pnlColor(r.pnl))}>{money(r.pnl, currency, { sign: true })}</td>
             </tr>
           ))}

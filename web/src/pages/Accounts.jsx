@@ -25,7 +25,7 @@ function CopyField({ label, value, secret }) {
   return (
     <Field label={label}>
       <div className="flex gap-2">
-        <code className="flex-1 truncate rounded-xl border border-line bg-bg px-3.5 py-2.5 font-mono text-xs text-slate-200">
+        <code className="flex-1 truncate rounded-xl border border-line bg-bg px-3.5 py-2.5 font-mono text-xs text-zinc-200">
           {shown ? value : '•'.repeat(Math.min(40, value.length))}
         </code>
         {secret && <Button variant="secondary" type="button" onClick={() => setShown(!shown)}>{shown ? 'Ocultar' : 'Mostrar'}</Button>}
@@ -45,7 +45,7 @@ function CopyField({ label, value, secret }) {
 
 function EaInstructions({ account, onRegenerate }) {
   const steps = [
-    <>Descarga <a className="font-medium text-violet-300 underline" href="/api/downloads/TradeStreakSync.mq5" download>TradeStreakSync.mq5</a>. En MT5 abre <b>Archivo → Abrir carpeta de datos</b> y cópialo en <code>MQL5/Experts</code>. Reinicia MT5 o pulsa "Actualizar" en el Navegador.</>,
+    <>Descarga <a className="font-medium text-crimson-300 underline" href="/api/downloads/TradeStreakSync.mq5" download>TradeStreakSync.mq5</a>. En MT5 abre <b>Archivo → Abrir carpeta de datos</b> y cópialo en <code>MQL5/Experts</code>. Reinicia MT5 o pulsa "Actualizar" en el Navegador.</>,
     <>Ve a <b>Herramientas → Opciones → Asesores Expertos</b>, activa <b>"Permitir WebRequest para las URL listadas"</b> y añade: <code className="break-all">{new URL(account.sync_url).origin}</code></>,
     <>Arrastra <b>TradeStreakSync</b> a cualquier gráfico, activa <b>"Permitir Algo Trading"</b> y pega tu <b>URL</b> y <b>token</b> en la pestaña Parámetros.</>,
     <>¡Listo! El EA envía tu historial completo y luego cada nueva operación al instante. Sólo lee datos: nunca abre ni cierra operaciones.</>,
@@ -56,8 +56,8 @@ function EaInstructions({ account, onRegenerate }) {
       <CopyField label="Token de sincronización" value={account.sync_token} secret />
       <ol className="space-y-3">
         {steps.map((s, i) => (
-          <li key={i} className="flex gap-3 text-sm text-slate-300">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand/20 text-xs font-semibold text-violet-200">{i + 1}</span>
+          <li key={i} className="flex gap-3 text-sm text-zinc-300">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand/20 text-xs font-semibold text-crimson-200">{i + 1}</span>
             <span className="[&_code]:rounded [&_code]:bg-panel-2 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-xs">{s}</span>
           </li>
         ))}
@@ -96,13 +96,13 @@ function ImportForm({ account, onDone }) {
 
   return (
     <form onSubmit={submit} className="space-y-4">
-      <div className="rounded-xl border border-line bg-panel-2/40 p-4 text-sm text-slate-300">
+      <div className="rounded-xl border border-line bg-panel-2/40 p-4 text-sm text-zinc-300">
         En MT5 abre la pestaña <b>Historial</b> (Caja de herramientas), selecciona el periodo <b>"Todo el historial"</b>, haz clic derecho y elige
         <b> Informe → HTML (Internet Explorer)</b>. Sube aquí ese archivo. También aceptamos CSV con columnas
         <code className="mx-1 rounded bg-panel-2 px-1 text-xs">symbol, type, volume, open_time, close_time, open_price, close_price, commission, swap, profit</code>.
       </div>
-      <label className={cx('flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-6 py-8 text-center transition', file ? 'border-brand/60 bg-brand/5' : 'border-line hover:border-slate-500')}>
-        <FileUp className="text-violet-300" />
+      <label className={cx('flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-6 py-8 text-center transition', file ? 'border-brand/60 bg-brand/5' : 'border-line hover:border-zinc-500')}>
+        <FileUp className="text-crimson-300" />
         <span className="text-sm font-medium">{file ? file.name : 'Haz clic para elegir el informe (.html, .htm o .csv)'}</span>
         <input type="file" accept=".html,.htm,.csv,.txt" className="hidden" onChange={(e) => { setFile(e.target.files[0]); setResult(null); }} />
       </label>
@@ -166,9 +166,9 @@ function AddAccountModal({ open, onClose, onCreated, metaapiEnabled }) {
                   disabled={disabled}
                   onClick={() => setMethod(id)}
                   className={cx('rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-40',
-                    method === id ? 'border-brand bg-brand/10 ring-1 ring-brand/40' : 'border-line hover:border-slate-500')}
+                    method === id ? 'border-crimson-500/70 bg-gradient-to-b from-crimson-600/15 to-transparent ring-1 ring-crimson-500/40' : 'border-white/[0.08] hover:border-crimson-500/40')}
                 >
-                  <div className="flex items-center justify-between"><Icon size={20} className="text-violet-300" /><Badge tone={id === 'ea' ? 'brand' : 'default'}>{badge}</Badge></div>
+                  <div className="flex items-center justify-between"><Icon size={20} className="text-crimson-300" /><Badge tone={id === 'ea' ? 'brand' : 'default'}>{badge}</Badge></div>
                   <div className="mt-3 font-semibold">{title}</div>
                   <div className="mt-1 text-xs leading-relaxed text-muted">{disabled ? 'No disponible: el administrador debe configurar METAAPI_TOKEN en el servidor.' : text}</div>
                 </button>
@@ -231,10 +231,10 @@ function AccountCard({ account, onChange }) {
   return (
     <Card padded={false}>
       <div className="flex flex-wrap items-start gap-4 p-5">
-        <div className="rounded-xl bg-panel-2 p-3 text-violet-300 ring-1 ring-line"><Wallet size={22} /></div>
+        <div className="rounded-xl bg-gradient-to-br from-crimson-600/25 to-crimson-900/20 p-3 text-crimson-300 ring-1 ring-crimson-500/30"><Wallet size={22} /></div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-semibold">{account.name}</h3>
+            <h3 className="text-base font-semibold">{account.name}</h3>
             <StatusBadge account={account} />
             <Badge>{CONNECTION_LABEL[account.connection_type]}</Badge>
           </div>
@@ -245,7 +245,7 @@ function AccountCard({ account, onChange }) {
           {account.status_message && <div className="mt-2 text-xs text-amber-300">{account.status_message}</div>}
         </div>
         <div className="grid w-full grid-cols-3 gap-4 border-t border-line pt-4 sm:w-auto sm:gap-6 sm:border-0 sm:pt-0 sm:text-right">
-          <div><div className="text-xs text-muted">Balance</div><div className="font-semibold tabular-nums">{money(account.balance, account.currency)}</div></div>
+          <div><div className="text-xs text-muted">Balance</div><div className="font-display font-semibold tabular-nums">{money(account.balance, account.currency)}</div></div>
           <div><div className="text-xs text-muted">P&L neto</div><div className={cx('font-semibold tabular-nums', pnlColor(account.net_pnl))}>{money(account.net_pnl, account.currency, { sign: true })}</div></div>
           <div><div className="text-xs text-muted">Trades</div><div className="font-semibold tabular-nums">{account.trade_count}</div></div>
         </div>

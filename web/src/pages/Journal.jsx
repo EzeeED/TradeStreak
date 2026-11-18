@@ -16,15 +16,15 @@ const MOODS = [
   { v: 5, e: '🤩', l: 'Excelente' },
 ];
 
-const TEMPLATE = `## Plan pre-mercado
-- Sesgo:
-- Niveles clave:
+const TEMPLATE = `## Antes de operar
+- ¿Qué espero del mercado hoy?
+- Niveles que estoy mirando:
 - Noticias:
 
-## Revisión
-- ¿Seguí mi plan?
-- Lo que hice bien:
-- Lo que debo mejorar:
+## Al cerrar
+- ¿Respeté el plan?
+- Lo que salió bien:
+- Lo que no repetiría:
 `;
 
 export default function Journal() {
@@ -66,7 +66,7 @@ export default function Journal() {
     <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
       <div className="space-y-6">
         <Card
-          title={<span className="capitalize">{longDate(date)}</span>}
+          title={longDate(date)}
           action={<Input type="date" value={date} onChange={(e) => e.target.value && setParams({ date: e.target.value })} className="w-auto py-1.5" aria-label="Fecha" />}
         >
           <div className="space-y-4">
@@ -93,7 +93,7 @@ export default function Journal() {
                 </div>
               )}
             </div>
-            <Textarea rows={14} value={content} onChange={(e) => setContent(e.target.value)} placeholder="¿Cómo fue tu sesión? Plan, emociones, lecciones…" className="font-mono text-[13px] leading-relaxed" />
+            <Textarea rows={14} value={content} onChange={(e) => setContent(e.target.value)} placeholder="¿Cómo te fue hoy? Qué tenías pensado, qué hiciste, cómo te sentiste…" className="font-mono text-[13px] leading-relaxed" />
             <ErrorBox error={status instanceof Error ? status : null} />
             <div className="flex items-center justify-between gap-3">
               {!content && <Button variant="ghost" onClick={() => setContent(TEMPLATE)}>Usar plantilla</Button>}
@@ -125,7 +125,7 @@ export default function Journal() {
             ))}
           </ul>
         ) : (
-          <div className="flex flex-col items-center px-5 py-10 text-center text-sm text-muted"><NotebookPen className="mb-2 text-crimson-300" />Escribe tu primera entrada del diario.</div>
+          <div className="flex flex-col items-center px-5 py-10 text-center text-sm text-muted"><NotebookPen className="mb-2 text-crimson-300" />Aquí vas a ver lo que escribas cada día.</div>
         )}
       </Card>
     </div>

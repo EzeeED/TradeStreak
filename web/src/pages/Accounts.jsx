@@ -17,7 +17,7 @@ function NotEnabledNotice() {
   return (
     <div className="flex gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
       <Info size={18} className="mt-0.5 shrink-0 text-amber-300" />
-      <span>La conexión con servidores MT5 todavía no está activada en TradeStreak. Mientras tanto puedes explorar la app con una <b>cuenta demo</b>.</span>
+      <span>Todavía estamos terminando la conexión con MT5. Mientras tanto, puedes probar todo con una <b>cuenta demo</b>.</span>
     </div>
   );
 }
@@ -60,14 +60,14 @@ function ConnectModal({ open, onClose, onCreated, enabled }) {
               <Input required type="password" value={form.password} onChange={set('password')} autoComplete="off" />
             </Field>
           </div>
-          <Field label="Nombre de la cuenta"><Input required value={form.name} onChange={set('name')} placeholder="Ej. FTMO 100k" /></Field>
+          <Field label="Nombre de la cuenta"><Input required value={form.name} onChange={set('name')} placeholder="Ej. Fondeo 100k" /></Field>
           <Field label="Broker (opcional)"><Input value={form.broker} onChange={set('broker')} placeholder="Ej. IC Markets" /></Field>
         </div>
         <div className="flex gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-xs leading-relaxed text-muted">
           <ShieldCheck size={16} className="mt-0.5 shrink-0 text-[#5aaeff]" />
           <span>
-            Usa la <b className="text-zinc-300">contraseña de inversor</b>: solo permite leer el historial, nadie puede operar con ella.
-            En MT5 la encuentras o cambias en <b className="text-zinc-300">Herramientas → Opciones → Servidor</b>. TradeStreak no guarda tu contraseña.
+            Usa la <b className="text-zinc-300">contraseña de inversor</b>: con ella solo se puede ver el historial, no operar.
+            Si no la tienes a mano, en MT5 puedes cambiarla en <b className="text-zinc-300">Herramientas → Opciones → Servidor</b>. No guardamos tu contraseña.
           </span>
         </div>
         <ErrorBox error={error} />
@@ -141,7 +141,7 @@ export default function Accounts() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-muted">Conecta tu cuenta de MetaTrader 5 con tu login, servidor y contraseña de inversor. Tus operaciones aparecerán automáticamente en tu diario.</p>
+        <p className="text-sm text-muted">Conecta tu cuenta de MT5 y tus operaciones aparecen solas en el diario.</p>
         <div className="flex gap-2">
           <Button variant="secondary" icon={Sparkles} loading={demoLoading} onClick={createDemo}>Cuenta demo</Button>
           <Button icon={Plus} onClick={() => setAdding(true)}>Conectar cuenta MT5</Button>
@@ -153,10 +153,10 @@ export default function Accounts() {
         <Card>
           <Empty
             icon={Server}
-            title="Aún no tienes cuentas conectadas"
+            title="Todavía no has conectado ninguna cuenta"
             action={<div className="flex flex-wrap justify-center gap-2"><Button icon={Plus} onClick={() => setAdding(true)}>Conectar cuenta MT5</Button><Button variant="secondary" icon={Sparkles} loading={demoLoading} onClick={createDemo}>Probar con datos demo</Button></div>}
           >
-            Solo necesitas tu número de cuenta, el servidor de tu broker y la contraseña de inversor. No hay que instalar nada.
+            Necesitas tu número de cuenta, el nombre del servidor de tu broker y la contraseña de inversor.
           </Empty>
         </Card>
       ) : (

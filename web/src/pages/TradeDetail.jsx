@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Star, Save } from 'lucide-react';
 import { api } from '../lib/api.js';
 import { useApi } from '../lib/useApi.js';
-import { dateTime, duration, money, num, pnlColor, price } from '../lib/format.js';
+import { dateTime, duration, lots, money, num, pnlColor, price } from '../lib/format.js';
 import { Button, Card, ErrorBox, Field, Input, Spinner, TagInput, Textarea, cx } from '../components/ui.jsx';
 import { SideBadge } from '../components/TradeTable.jsx';
 
@@ -60,7 +60,7 @@ export default function TradeDetail() {
     ['Apertura', dateTime(t.open_time)],
     ['Cierre', dateTime(t.close_time)],
     ['Duración', duration(t.duration_sec)],
-    ['Volumen', `${num(t.volume)} lotes`],
+    ['Volumen', lots(t.volume)],
     ['Precio entrada', price(t.entry_price)],
     ['Precio salida', price(t.exit_price)],
     ['Stop loss', price(t.sl)],
@@ -90,7 +90,7 @@ export default function TradeDetail() {
           </dl>
           {deals.length > 0 && (
             <div className="mt-5 border-t border-line pt-4">
-              <h4 className="mb-2 text-xs font-medium uppercase tracking-wide text-muted">Ejecuciones (deals)</h4>
+              <h4 className="mb-2 text-xs font-medium uppercase tracking-wide text-muted">Entradas y salidas</h4>
               <div className="space-y-1.5 text-xs">
                 {deals.map((d) => (
                   <div key={d.id} className="flex justify-between gap-2 rounded-lg bg-panel-2/60 px-2.5 py-1.5 tabular-nums">
@@ -112,7 +112,7 @@ export default function TradeDetail() {
                   <Input value={form.setup} list="setups" onChange={(e) => setForm({ ...form, setup: e.target.value })} placeholder="Ej. Breakout, Pullback" />
                   <datalist id="setups">{options.data?.setups.map((s) => <option key={s} value={s} />)}</datalist>
                 </Field>
-                <Field label="Valoración de la ejecución"><Rating value={form.rating} onChange={(rating) => setForm({ ...form, rating })} /></Field>
+                <Field label="¿Cómo la ejecutaste?"><Rating value={form.rating} onChange={(rating) => setForm({ ...form, rating })} /></Field>
               </div>
               <Field label="Etiquetas" hint="Enter para añadir">
                 <TagInput value={form.tags} onChange={(tags) => setForm({ ...form, tags })} suggestions={options.data?.tags || []} placeholder="Ej. A+, Sesión Londres" />
@@ -121,7 +121,7 @@ export default function TradeDetail() {
                 <TagInput value={form.mistakes} onChange={(mistakes) => setForm({ ...form, mistakes })} suggestions={[...new Set([...SUGGESTED_MISTAKES, ...(options.data?.mistakes || [])])]} placeholder="Ej. FOMO, Revenge trade" />
               </Field>
               <Field label="Notas">
-                <Textarea rows={8} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="¿Por qué entraste? ¿Seguiste tu plan? ¿Qué harías distinto?" />
+                <Textarea rows={8} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="¿Por qué entraste? ¿Qué harías distinto la próxima vez?" />
               </Field>
               <ErrorBox error={saveError} />
               <div className="flex items-center justify-end gap-3">

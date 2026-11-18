@@ -6,9 +6,9 @@ import { Button, ErrorBox, Field, Input } from '../components/ui.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const FEATURES = [
-  { icon: PlugZap, title: 'Conecta tu MT5', text: 'Solo con tu login, servidor y contraseña de inversor. Sin instalar nada.' },
-  { icon: LineChart, title: 'Analiza cada trade', text: 'Win rate, profit factor, drawdown, rendimiento por símbolo, hora y día.' },
-  { icon: Flame, title: 'Construye rachas', text: 'Diario, etiquetas, errores y tu TradeStreak Score para mejorar con disciplina.' },
+  { icon: PlugZap, title: 'Tu cuenta de MT5, conectada', text: 'Con el número de cuenta, el servidor y la contraseña de inversor es suficiente. No hay que instalar nada en la plataforma.' },
+  { icon: LineChart, title: 'Mira qué te funciona', text: 'En qué pares ganas, a qué hora operas mejor y cuánto te cuestan los días malos.' },
+  { icon: Flame, title: 'Sé constante', text: 'Anota qué pensabas en cada entrada y revisa tus errores antes de que se repitan.' },
 ];
 
 export default function AuthPage({ mode }) {
@@ -41,7 +41,7 @@ export default function AuthPage({ mode }) {
         <Logo size={34} />
         <div className="relative">
           <h2 className="max-w-md text-4xl font-bold leading-tight tracking-tight">
-            El diario de trading que convierte tus datos de <span className="text-gradient-red">MT5</span> en disciplina.
+            Tus trades de <span className="text-gradient-red">MT5</span>, ordenados y sin planillas.
           </h2>
           <div className="mt-10 space-y-6">
             {FEATURES.map(({ icon: Icon, title, text }) => (
@@ -62,8 +62,8 @@ export default function AuthPage({ mode }) {
         <form onSubmit={submit} className="w-full max-w-sm space-y-5">
           <div className="mb-8 lg:hidden"><Logo size={34} /></div>
           <div>
-            <h1 className="text-3xl font-bold">{isLogin ? 'Bienvenido de vuelta' : 'Crea tu cuenta'}</h1>
-            <p className="mt-1 text-sm text-muted">{isLogin ? 'Entra para ver tu rendimiento.' : 'Empieza a registrar tus trades en minutos.'}</p>
+            <h1 className="text-3xl font-bold">{isLogin ? 'Hola de nuevo' : 'Crea tu cuenta'}</h1>
+            <p className="mt-1 text-sm text-muted">{isLogin ? 'Entra y mira cómo vas.' : 'Te lleva un minuto.'}</p>
           </div>
           <ErrorBox error={error} />
           {!isLogin && (

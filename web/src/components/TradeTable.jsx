@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowDownRight, ArrowUpRight, Star } from 'lucide-react';
-import { dateTime, duration, money, num, pnlColor, price } from '../lib/format.js';
+import { dateTime, duration, lots, money, num, pnlColor, price } from '../lib/format.js';
 import { Badge, cx } from './ui.jsx';
 
 export function SideBadge({ side }) {
@@ -26,7 +26,30 @@ const COLUMNS = [
 export default function TradeTable({ trades, sort, dir, onSort, compact }) {
   const navigate = useNavigate();
   return (
-    <div className="overflow-x-auto">
+    <>
+      {/* Móvil: lista compacta con el P&L siempre visible */}
+      <ul className="divide-y divide-white/[0.06] md:hidden">
+        {trades.map((t) => (
+          <li key={t.id}>
+            <Link to={`/trades/${t.id}`} className="flex items-center gap-3 px-4 py-3 active:bg-white/[0.04]">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold">{t.symbol}</span>
+                  <SideBadge side={t.side} />
+                  {t.status === 'open' && <Badge tone="warn">Abierto</Badge>}
+                </div>
+                <div className="mt-0.5 truncate text-xs text-muted">
+                  {dateTime(t.close_time || t.open_time)} · {lots(t.volume)}{t.setup ? ` · ${t.setup}` : ''}
+                </div>
+              </div>
+              <div className={cx('text-right font-semibold tabular-nums', pnlColor(t.net_profit))}>
+                {t.status === 'open' ? <span className="text-muted">—</span> : money(t.net_profit, t.currency, { sign: true })}
+              </div>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    <div className="hidden overflow-x-auto md:block">
       <table className="w-full min-w-[560px] text-sm">
         <thead>
           <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-muted">
@@ -77,5 +100,6 @@ export default function TradeTable({ trades, sort, dir, onSort, compact }) {
         </tbody>
       </table>
     </div>
+    </>
   );
 }

@@ -25,7 +25,7 @@ export default function Calendar() {
       </Card>
       {day && (
         <Card
-          title={<span className="capitalize">{longDate(day)}</span>}
+          title={longDate(day)}
           padded={false}
           action={
             <div className="flex items-center gap-4 text-sm">
@@ -34,7 +34,7 @@ export default function Calendar() {
             </div>
           }
         >
-          {dayTrades.data?.trades.length ? <TradeTable trades={dayTrades.data.trades} /> : <p className="p-5 text-sm text-muted">{dayTrades.loading ? 'Cargando…' : 'Sin trades este día.'}</p>}
+          {dayTrades.data?.trades.length ? <TradeTable trades={dayTrades.data.trades} /> : <p className="p-5 text-sm text-muted">{dayTrades.loading ? 'Cargando…' : 'Este día no operaste.'}</p>}
         </Card>
       )}
     </div>

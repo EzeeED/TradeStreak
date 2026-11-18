@@ -44,8 +44,11 @@ export const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'J
 
 export function longDate(isoDate) {
   const d = new Date(isoDate + 'T00:00:00Z');
-  return d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+  const s = d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
+
+export const lots = (n) => `${num(n)} ${Number(n) === 1 ? 'lote' : 'lotes'}`;
 
 export const pnlColor = (n) => (n > 0 ? 'text-win' : n < 0 ? 'text-loss' : 'text-muted');
 

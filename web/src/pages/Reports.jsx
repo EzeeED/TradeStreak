@@ -37,7 +37,7 @@ export default function Reports() {
   const { data, loading, error } = useApi('/stats', query, [version]);
   if (loading && !data) return <Spinner />;
   if (error) return <ErrorBox error={error} />;
-  if (!data.summary.totalTrades) return <Card><Empty icon={BarChart3} title="Sin datos en este periodo" /></Card>;
+  if (!data.summary.totalTrades) return <Card><Empty icon={BarChart3} title="No hay trades en estas fechas" /></Card>;
   const s = data.summary;
   const sideLabel = { long: 'Long', short: 'Short' };
   const hours = data.byHour.map((h) => ({ ...h, label: `${String(h.key).padStart(2, '0')}:00` }));

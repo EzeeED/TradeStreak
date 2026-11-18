@@ -25,12 +25,12 @@ export default function Trades() {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-        <Select value={f.symbol} onChange={set('symbol')} aria-label="Símbolo"><option value="">Todos los símbolos</option>{o.symbols.map((s) => <option key={s}>{s}</option>)}</Select>
-        <Select value={f.side} onChange={set('side')} aria-label="Lado"><option value="">Long y short</option><option value="long">Long</option><option value="short">Short</option></Select>
-        <Select value={f.result} onChange={set('result')} aria-label="Resultado"><option value="">Ganadores y perdedores</option><option value="win">Ganadores</option><option value="loss">Perdedores</option></Select>
-        <Select value={f.status} onChange={set('status')} aria-label="Estado"><option value="">Abiertos y cerrados</option><option value="closed">Cerrados</option><option value="open">Abiertos</option></Select>
-        <Select value={f.setup} onChange={set('setup')} aria-label="Setup"><option value="">Todos los setups</option>{o.setups.map((s) => <option key={s}>{s}</option>)}</Select>
-        <Select value={f.tag} onChange={set('tag')} aria-label="Etiqueta"><option value="">Todas las etiquetas</option>{o.tags.map((s) => <option key={s}>{s}</option>)}</Select>
+        <Select value={f.symbol} onChange={set('symbol')} aria-label="Símbolo"><option value="">Símbolos</option>{o.symbols.map((s) => <option key={s}>{s}</option>)}</Select>
+        <Select value={f.side} onChange={set('side')} aria-label="Lado"><option value="">Long / Short</option><option value="long">Long</option><option value="short">Short</option></Select>
+        <Select value={f.result} onChange={set('result')} aria-label="Resultado"><option value="">Resultado</option><option value="win">Ganadores</option><option value="loss">Perdedores</option></Select>
+        <Select value={f.status} onChange={set('status')} aria-label="Estado"><option value="">Estado</option><option value="closed">Cerrados</option><option value="open">Abiertos</option></Select>
+        <Select value={f.setup} onChange={set('setup')} aria-label="Setup"><option value="">Setups</option>{o.setups.map((s) => <option key={s}>{s}</option>)}</Select>
+        <Select value={f.tag} onChange={set('tag')} aria-label="Etiqueta"><option value="">Etiquetas</option>{o.tags.map((s) => <option key={s}>{s}</option>)}</Select>
       </div>
 
       <Card padded={false}>
@@ -44,7 +44,7 @@ export default function Trades() {
         {list.loading && !list.data ? <Spinner /> : list.data?.trades.length ? (
           <TradeTable trades={list.data.trades} sort={sort.sort} dir={sort.dir} onSort={onSort} />
         ) : (
-          <Empty icon={ListOrdered} title="No hay trades con estos filtros" />
+          <Empty icon={ListOrdered} title="Ningún trade coincide con esos filtros" />
         )}
         {pages > 1 && (
           <div className="flex items-center justify-between border-t border-line px-5 py-3 text-sm">

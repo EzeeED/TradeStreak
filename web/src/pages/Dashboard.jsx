@@ -112,7 +112,7 @@ function EditToolbar({ dash }) {
   return (
     <div className="sticky top-[4.5rem] z-20 flex flex-wrap items-center gap-2 rounded-2xl border border-crimson-500/40 bg-black/80 p-3 backdrop-blur-xl lg:top-20">
       <Pencil size={16} className="text-crimson-400" />
-      <span className="mr-auto text-sm text-zinc-300">Arrastra <span className="hidden lg:inline">desde el asa ⋮⋮ </span>para mover, cambia el tamaño u oculta widgets.</span>
+      <span className="mr-auto text-sm text-zinc-300">Arrastra cada bloque desde ⋮⋮ y acomódalo como quieras.</span>
       <Button variant="ghost" icon={RotateCcw} onClick={dash.reset}>Restablecer</Button>
       <Button variant="secondary" onClick={dash.cancel}>Cancelar</Button>
       <Button icon={Check} loading={dash.saving} onClick={dash.save}>Guardar</Button>
@@ -132,10 +132,10 @@ export default function Dashboard() {
       <Card>
         <Empty
           icon={Sparkles}
-          title="Conecta tu primera cuenta de MT5"
-          action={<Link to="/accounts"><Button icon={Plus}>Añadir cuenta</Button></Link>}
+          title="Empecemos por tu cuenta de MT5"
+          action={<Link to="/accounts"><Button icon={Plus}>Conectar cuenta</Button></Link>}
         >
-          TradeStreak sincroniza tus operaciones de MetaTrader 5 y calcula tus métricas, rachas y TradeStreak Score. También puedes probar con una cuenta demo.
+          En cuanto la conectes vas a ver aquí tus resultados, tus rachas y en qué estás fallando. Si solo quieres echar un vistazo, carga la cuenta demo desde Cuentas MT5.
         </Empty>
       </Card>
     );
@@ -147,8 +147,8 @@ export default function Dashboard() {
   if (!s.totalTrades) {
     return (
       <Card>
-        <Empty icon={Target} title="Todavía no hay trades cerrados en este periodo">
-          Cuando tu cuenta sincronice operaciones aparecerán aquí. Revisa el estado de la conexión en <Link to="/accounts" className="text-crimson-300 underline">Cuentas MT5</Link> o cambia el periodo.
+        <Empty icon={Target} title="No hay trades cerrados en estas fechas">
+          Prueba con otro periodo arriba, o revisa en <Link to="/accounts" className="text-crimson-300 underline">Cuentas MT5</Link> que la cuenta esté sincronizando.
         </Empty>
       </Card>
     );
@@ -182,7 +182,7 @@ export default function Dashboard() {
           <Card className="h-full" title="Resumen">
             <dl className="space-y-2.5 text-sm">
               {[
-                ['Esperanza por trade', money(s.expectancy, currency, { sign: true }), pnlColor(s.expectancy)],
+                ['Media por trade', money(s.expectancy, currency, { sign: true }), pnlColor(s.expectancy)],
                 ['Mejor trade', money(s.largestWin, currency, { sign: true }), 'text-win'],
                 ['Peor trade', money(s.largestLoss, currency), 'text-loss'],
                 ['P&L medio diario', money(s.avgDailyPnl, currency, { sign: true }), pnlColor(s.avgDailyPnl)],
@@ -217,7 +217,7 @@ export default function Dashboard() {
       <ErrorBox error={dash.error} />
       <WidgetGrid layout={dash.layout} onChange={dash.change} widgets={widgets} editing={dash.editing} />
 
-      <p className="flex items-center gap-2 text-xs text-muted"><Trophy size={12} />Las horas se muestran en la hora del servidor de tu broker, igual que en MT5.</p>
+      <p className="flex items-center gap-2 text-xs text-muted"><Trophy size={12} />Las horas son las del servidor de tu broker, igual que en MT5.</p>
     </div>
   );
 }

@@ -69,7 +69,7 @@ router.post('/', async (c) => {
   const db = getDb(c);
   const data = createSchema.parse(await body(c));
   const api = meta(c);
-  if (!api.enabled) throw new HttpError(503, 'La conexión con servidores MT5 todavía no está activada en TradeStreak.');
+  if (!api.enabled) throw new HttpError(503, 'La conexión con MT5 todavía no está disponible. Mientras tanto puedes usar la cuenta demo.');
   if (!data.login || !data.server || !data.password) throw new HttpError(400, 'Login, servidor y contraseña son obligatorios');
   let metaapiId;
   try {

@@ -89,6 +89,13 @@ CREATE TABLE IF NOT EXISTS trades (
 );
 CREATE INDEX IF NOT EXISTS idx_trades_close ON trades(account_id, close_time);
 
+-- Preferencias de interfaz por usuario (p. ej. diseño del dashboard)
+CREATE TABLE IF NOT EXISTS user_settings (
+  user_id          INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  dashboard_layout TEXT,
+  updated_at       TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS journal_entries (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

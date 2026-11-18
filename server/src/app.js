@@ -9,6 +9,7 @@ import accountRoutes from './routes/accounts.js';
 import tradeRoutes from './routes/trades.js';
 import statsRoutes from './routes/stats.js';
 import journalRoutes from './routes/journal.js';
+import settingsRoutes from './routes/settings.js';
 
 export function createApp() {
   const app = express();
@@ -21,6 +22,7 @@ export function createApp() {
   app.use('/api/trades', requireAuth, tradeRoutes);
   app.use('/api/stats', requireAuth, statsRoutes);
   app.use('/api/journal', requireAuth, journalRoutes);
+  app.use('/api/settings', requireAuth, settingsRoutes);
   app.use('/api', (req, res) => res.status(404).json({ error: 'Ruta no encontrada' }));
 
   // En producción servimos el frontend compilado

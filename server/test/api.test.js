@@ -104,6 +104,17 @@ test('flujo completo: registro, cuenta, deals, diario, stats', async () => {
   assert.equal(r.data.summary.currentStreakType, 'loss');
   assert.ok(r.data.score.total >= 0 && r.data.score.total <= 100);
 
+  // Diseño del dashboard
+  r = await api('/api/settings');
+  assert.equal(r.data.dashboardLayout, null);
+  const layout = [{ id: 'calendar', span: 12, hidden: false }, { id: 'kpis', span: 6, hidden: true }];
+  r = await api('/api/settings/dashboard', { method: 'PUT', body: { layout } });
+  assert.equal(r.status, 200);
+  r = await api('/api/settings');
+  assert.deepEqual(r.data.dashboardLayout, layout);
+  r = await api('/api/settings/dashboard', { method: 'PUT', body: { layout: [{ id: 'x', span: 5 }] } });
+  assert.equal(r.status, 400);
+
   // Diario
   r = await api('/api/journal/2024-03-04', { method: 'PUT', body: { content: 'Día disciplinado', mood: 4 } });
   assert.equal(r.data.entry.mood, 4);

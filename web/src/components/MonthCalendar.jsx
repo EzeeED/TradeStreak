@@ -28,8 +28,8 @@ export default function MonthCalendar({ month, onMonthChange, daily, currency, o
   const today = new Date().toISOString().slice(0, 10);
 
   return (
-    <div>
-      <div className="mb-4 flex items-center justify-between gap-3">
+    <div className="@container">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1">
           <button onClick={() => shift(-1)} className="rounded-lg p-1.5 text-muted hover:bg-panel-2 hover:text-white" aria-label="Mes anterior"><ChevronLeft size={18} /></button>
           <h3 className="min-w-36 text-center font-semibold">{MONTHS[m - 1]} {y}</h3>
@@ -40,9 +40,9 @@ export default function MonthCalendar({ month, onMonthChange, daily, currency, o
           <span className="ml-2">· {monthDays.length} días</span>
         </div>
       </div>
-      <div className="grid grid-cols-7 gap-1.5 sm:grid-cols-8">
+      <div className="grid grid-cols-7 gap-1.5 @md:grid-cols-8">
         {DOW.map((d) => <div key={d} className="pb-1 text-center text-xs font-medium text-muted">{d}</div>)}
-        <div className="hidden pb-1 text-center text-xs font-medium text-muted sm:block">Semana</div>
+        <div className="hidden pb-1 text-center text-xs font-medium text-muted @md:block">Semana</div>
         {weeks.map((week, wi) => {
           const wDays = week.filter(Boolean).map((d) => byDate.get(d)).filter(Boolean);
           const wPnl = wDays.reduce((s, d) => s + d.pnl, 0);
@@ -60,22 +60,22 @@ export default function MonthCalendar({ month, onMonthChange, daily, currency, o
                   style={{ background: bg }}
                   title={d ? `${day}: ${money(d.pnl, currency, { sign: true })} · ${d.trades} trades` : day}
                   className={cx(
-                    'flex flex-col rounded-xl border p-1.5 text-left transition hover:border-zinc-400 sm:p-2',
-                    compact ? 'min-h-14' : 'min-h-16 sm:min-h-24',
+                    'flex flex-col rounded-xl border p-1.5 text-left transition hover:border-zinc-400 @md:p-2',
+                    compact ? 'min-h-14' : 'min-h-16 @md:min-h-24',
                     selected === day ? 'border-brand ring-1 ring-brand' : d ? (d.pnl >= 0 ? 'border-sky-500/30' : 'border-rose-500/30') : 'border-white/[0.05] bg-white/[0.015]',
                   )}
                 >
                   <span className={cx('text-xs', day === today ? 'rounded bg-gradient-to-b from-crimson-500 to-crimson-700 px-1.5 font-semibold text-white' : 'text-muted')}>{Number(day.slice(8))}</span>
                   {d && (
                     <span className="mt-auto">
-                      <span className="block truncate text-[11px] font-semibold tabular-nums text-white sm:text-xs lg:text-sm">{compact ? shortMoney(d.pnl) : money(d.pnl, currency, { sign: true, compact: true })}</span>
-                      {!compact && <span className="hidden text-[11px] text-zinc-300 sm:block">{d.trades} trade{d.trades !== 1 ? 's' : ''} · {Math.round((d.wins / d.trades) * 100)}%</span>}
+                      <span className="block truncate text-[11px] font-semibold tabular-nums text-white @md:text-xs @2xl:text-sm">{compact ? shortMoney(d.pnl) : money(d.pnl, currency, { sign: true, compact: true })}</span>
+                      {!compact && <span className="hidden text-[11px] text-zinc-300 @md:block">{d.trades} trade{d.trades !== 1 ? 's' : ''} · {Math.round((d.wins / d.trades) * 100)}%</span>}
                     </span>
                   )}
                 </button>
               );
             }),
-            <div key={`w${wi}`} className={cx('hidden flex-col justify-center rounded-xl border border-white/[0.05] bg-white/[0.03] p-2 text-center sm:flex', compact ? 'min-h-14' : 'min-h-24')}>
+            <div key={`w${wi}`} className={cx('hidden flex-col justify-center rounded-xl border border-white/[0.05] bg-white/[0.03] p-2 text-center @md:flex', compact ? 'min-h-14' : 'min-h-24')}>
               <span className="text-[11px] text-muted">S{wi + 1}</span>
               <span className={cx('text-sm font-semibold tabular-nums', wPnl > 0 ? 'text-win' : wPnl < 0 ? 'text-loss' : 'text-muted')}>{wDays.length ? (compact ? shortMoney(wPnl) : money(wPnl, currency, { sign: true, compact: true })) : '—'}</span>
               {wDays.length > 0 && !compact && <span className="text-[11px] text-muted">{wDays.length} días</span>}

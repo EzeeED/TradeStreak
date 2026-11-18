@@ -10,6 +10,8 @@ if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
 
 export const config = {
   port: Number(process.env.PORT || 4000),
+  // Subruta pública de la app (p. ej. '/app'). Debe coincidir con la usada al compilar la web.
+  basePath: (process.env.BASE_PATH || '').replace(/\/+$/, ''),
   dbPath: process.env.DB_PATH || path.join(root, 'data', 'tradestreak.db'),
   jwtSecret: process.env.JWT_SECRET || crypto.createHash('sha256').update('tradestreak-dev-secret').digest('hex'),
   // MetaApi (opcional): conecta cuentas MT5 con login/contraseña/servidor.

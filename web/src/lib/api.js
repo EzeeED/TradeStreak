@@ -15,7 +15,7 @@ export class ApiError extends Error {
 }
 
 export async function api(path, { method = 'GET', body, query } = {}) {
-  const url = new URL('/api' + path, window.location.origin);
+  const url = new URL(`${import.meta.env.BASE_URL}api${path}`, window.location.origin);
   if (query) for (const [k, v] of Object.entries(query)) if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, v);
   const isForm = body instanceof FormData;
   const token = getToken();

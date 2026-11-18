@@ -28,7 +28,8 @@ export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route index element={<Dashboard />} />
+        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="dashboard" element={<Dashboard />} />
         <Route path="trades" element={<Trades />} />
         <Route path="trades/:id" element={<TradeDetail />} />
         <Route path="calendar" element={<Calendar />} />
@@ -36,7 +37,7 @@ export default function App() {
         <Route path="journal" element={<Journal />} />
         <Route path="accounts" element={<Accounts />} />
       </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }

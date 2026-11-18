@@ -7,7 +7,7 @@ import { useFilters, RANGES } from '../context/FiltersContext.jsx';
 import { cx } from './ui.jsx';
 
 const NAV = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/trades', label: 'Trades', icon: ListOrdered },
   { to: '/calendar', label: 'Calendario', icon: CalendarDays },
   { to: '/reports', label: 'Reportes', icon: BarChart3 },
@@ -15,7 +15,7 @@ const NAV = [
   { to: '/accounts', label: 'Cuentas MT5', icon: Wallet },
 ];
 
-const TITLES = { '/': 'Dashboard', '/trades': 'Trades', '/calendar': 'Calendario', '/reports': 'Reportes', '/journal': 'Diario', '/accounts': 'Cuentas MT5' };
+const TITLES = { '/dashboard': 'Dashboard', '/trades': 'Trades', '/calendar': 'Calendario', '/reports': 'Reportes', '/journal': 'Diario', '/accounts': 'Cuentas MT5' };
 
 export default function Layout() {
   const { user, logout } = useAuth();

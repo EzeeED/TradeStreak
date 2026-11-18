@@ -43,6 +43,32 @@ Las variables de entorno están descritas en `.env.example`.
 
 Las notas y etiquetas que escribas se conservan aunque el trade se vuelva a sincronizar.
 
+## Desplegar en una subruta (p. ej. delorrio.com/app)
+
+La app puede vivir bajo una subruta definida con `BASE_PATH`. Hay que usar el mismo valor al compilar la web y al arrancar el servidor:
+
+```bash
+BASE_PATH=/app npm run build
+BASE_PATH=/app JWT_SECRET=... METAAPI_TOKEN=... npm start   # http://localhost:4000/app/dashboard
+```
+
+Con Docker:
+
+```bash
+docker build -t tradestreak --build-arg BASE_PATH=/app .
+docker run -d -p 4000:4000 -v tradestreak-data:/data -e JWT_SECRET=... -e METAAPI_TOKEN=... tradestreak
+```
+
+Después, en el servidor web del dominio, se reenvía `/app/` al contenedor sin quitar el prefijo. Ejemplo con nginx:
+
+```nginx
+location /app/ {
+    proxy_pass http://127.0.0.1:4000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
 ## Arquitectura
 
 ```

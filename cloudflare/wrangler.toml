@@ -1,0 +1,10 @@
+name = "tradestreak-proxy"
+main = "worker.js"
+compatibility_date = "2025-06-01"
+
+# Solo las peticiones a delorrio.com/app/* pasan por el Worker.
+routes = [{ pattern = "delorrio.com/app*", zone_name = "delorrio.com" }]
+
+[vars]
+# URL del servidor donde corre TradeStreak (Render, Railway, Fly.io, VPS...).
+BACKEND_ORIGIN = "https://tradestreak.onrender.com"

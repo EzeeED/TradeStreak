@@ -9,7 +9,6 @@ import accountRoutes from './routes/accounts.js';
 import tradeRoutes from './routes/trades.js';
 import statsRoutes from './routes/stats.js';
 import journalRoutes from './routes/journal.js';
-import syncRoutes from './routes/sync.js';
 
 export function createApp() {
   const app = express();
@@ -18,14 +17,10 @@ export function createApp() {
 
   app.get('/api/health', (req, res) => res.json({ ok: true }));
   app.use('/api/auth', authRoutes);
-  app.use('/api/sync', syncRoutes);
   app.use('/api/accounts', requireAuth, accountRoutes);
   app.use('/api/trades', requireAuth, tradeRoutes);
   app.use('/api/stats', requireAuth, statsRoutes);
   app.use('/api/journal', requireAuth, journalRoutes);
-  app.get('/api/downloads/TradeStreakSync.mq5', (req, res) => {
-    res.download(path.join(config.mt5Dir, 'TradeStreakSync.mq5'));
-  });
   app.use('/api', (req, res) => res.status(404).json({ error: 'Ruta no encontrada' }));
 
   // En producción servimos el frontend compilado
@@ -40,7 +35,7 @@ export function createApp() {
     }
     if (err.type === 'entity.parse.failed') return res.status(400).json({ error: 'JSON inválido' });
     const status = err.status || 500;
-    if (status >= 500) console.error(err);
+    if (status >= 500 && !(err instanceof HttpError)) console.error(err);
     const message = status < 500 || err instanceof HttpError ? err.message : 'Error interno del servidor';
     res.status(status).json({ error: message });
   });

@@ -51,7 +51,7 @@ export default function MonthCalendar({ month, onMonthChange, daily, currency, o
               if (!day) return <div key={`${wi}-${di}`} />;
               const d = byDate.get(day);
               const intensity = d ? 0.12 + 0.4 * Math.min(1, Math.abs(d.pnl) / maxAbs) : 0;
-              const bg = d ? (d.pnl >= 0 ? `rgba(52,211,153,${intensity})` : `rgba(225,29,72,${intensity})`) : undefined;
+              const bg = d ? (d.pnl >= 0 ? `rgba(30,144,255,${intensity})` : `rgba(225,29,72,${intensity})`) : undefined;
               return (
                 <button
                   key={day}
@@ -62,7 +62,7 @@ export default function MonthCalendar({ month, onMonthChange, daily, currency, o
                   className={cx(
                     'flex flex-col rounded-xl border p-1.5 text-left transition hover:border-zinc-400 sm:p-2',
                     compact ? 'min-h-14' : 'min-h-16 sm:min-h-24',
-                    selected === day ? 'border-brand ring-1 ring-brand' : d ? (d.pnl >= 0 ? 'border-emerald-500/30' : 'border-rose-500/30') : 'border-white/[0.05] bg-white/[0.015]',
+                    selected === day ? 'border-brand ring-1 ring-brand' : d ? (d.pnl >= 0 ? 'border-sky-500/30' : 'border-rose-500/30') : 'border-white/[0.05] bg-white/[0.015]',
                   )}
                 >
                   <span className={cx('text-xs', day === today ? 'rounded bg-gradient-to-b from-crimson-500 to-crimson-700 px-1.5 font-semibold text-white' : 'text-muted')}>{Number(day.slice(8))}</span>

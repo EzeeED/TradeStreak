@@ -29,7 +29,7 @@ export const toDealEntry = (v) => mapEnum(v, DEAL_ENTRIES, /^deal_entry_/);
 
 /**
  * Convierte distintos formatos de fecha a 'YYYY-MM-DDTHH:MM:SS' (hora del servidor, sin zona).
- * Acepta: segundos unix (EA), milisegundos, '2024.01.05 10:20:30' (informe MT5),
+ * Acepta: segundos unix, milisegundos, '2024.01.05 10:20:30' (informe MT5),
  * '2024-01-05 10:20:30.123' (brokerTime de MetaApi) e ISO.
  */
 export function toServerTime(value) {
@@ -55,7 +55,7 @@ const num = (v) => {
 };
 const optNum = (v) => (v === null || v === undefined || v === '' || Number(v) === 0 ? null : num(v));
 
-/** Normaliza un deal proveniente del EA, de MetaApi o de un import. */
+/** Normaliza un deal proveniente de MetaApi o de un import. */
 export function normalizeDeal(raw) {
   const ticket = raw.ticket ?? raw.id ?? raw.deal;
   if (ticket === undefined || ticket === null) throw new Error('Deal sin ticket');

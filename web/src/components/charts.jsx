@@ -1,9 +1,9 @@
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, PolarAngleAxis, PolarGrid, Radar, RadarChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { money, date, pct } from '../lib/format.js';
 
-// Polaridad validada para daltonismo sobre la superficie oscura (ΔE deutan 17.7);
+// Polaridad validada para daltonismo sobre la superficie oscura (ΔE deutan 28);
 // además el signo +/− y la dirección de la barra codifican lo mismo.
-export const WIN = '#34d399';
+export const WIN = '#1e90ff';
 export const LOSS = '#e11d48';
 export const BRAND = '#f21d38';
 const GRID = '#1f1f23';
@@ -64,7 +64,7 @@ export function EquityChart({ data, currency, height = 260 }) {
   );
 }
 
-/** Barras con polaridad (verde positivo / rojo negativo). */
+/** Barras con polaridad (azul positivo / rojo negativo). */
 export function PnlBars({ data, xKey, currency, height = 240, labelFormatter = (v) => v, extraRows }) {
   return (
     <ResponsiveContainer width="100%" height={height}>

@@ -103,7 +103,7 @@ export function Modal({ open, onClose, title, children, wide }) {
 export function Badge({ children, tone = 'default', className }) {
   const tones = {
     default: 'bg-panel-2 text-zinc-300 border-line',
-    win: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/25',
+    win: 'bg-[#1e90ff]/10 text-[#5aaeff] border-[#1e90ff]/30',
     loss: 'bg-rose-500/10 text-rose-300 border-rose-500/25',
     brand: 'bg-crimson-600/15 text-crimson-200 border-crimson-500/30',
     warn: 'bg-amber-500/10 text-amber-300 border-amber-500/25',

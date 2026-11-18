@@ -1,9 +1,7 @@
 import { Router } from 'express';
-import crypto from 'node:crypto';
 import multer from 'multer';
 import { z } from 'zod';
 import { db } from '../db.js';
-import { config } from '../config.js';
 import { HttpError } from '../auth.js';
 import { ownedAccount } from './helpers.js';
 import { ingestDeals, upsertTrades } from '../lib/mt5.js';
@@ -14,8 +12,6 @@ import * as metaapi from '../lib/metaapi.js';
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
 
-const newToken = () => 'ts_' + crypto.randomBytes(24).toString('hex');
-
 function serialize(acc) {
   const stats = db
     .prepare(`SELECT COUNT(*) AS trades, COALESCE(SUM(net_profit), 0) AS pnl, MIN(open_time) AS first_trade
@@ -23,8 +19,7 @@ function serialize(acc) {
     .get(acc.id);
   return {
     ...acc,
-    sync_token: acc.connection_type === 'ea' ? acc.sync_token : undefined,
-    sync_url: acc.connection_type === 'ea' ? `${config.publicUrl}/api/sync/mt5` : undefined,
+    sync_token: undefined,
     trade_count: stats.trades,
     net_pnl: Math.round(stats.pnl * 100) / 100,
     first_trade: stats.first_trade,
@@ -42,7 +37,7 @@ router.get('/:id', (req, res) => {
 
 const createSchema = z.object({
   name: z.string().trim().min(1, 'Ponle un nombre a la cuenta').max(80),
-  connection_type: z.enum(['ea', 'metaapi', 'import']),
+  connection_type: z.literal('metaapi').default('metaapi'),
   broker: z.string().trim().max(120).optional().nullable(),
   server: z.string().trim().max(120).optional().nullable(),
   login: z.string().trim().regex(/^\d*$/, 'El login de MT5 es numérico').max(20).optional().nullable(),
@@ -52,26 +47,19 @@ const createSchema = z.object({
 
 router.post('/', async (req, res) => {
   const data = createSchema.parse(req.body);
-  let metaapiId = null;
-
-  if (data.connection_type === 'metaapi') {
-    if (!metaapi.metaapiEnabled()) throw new HttpError(400, 'La conexión con MetaApi no está configurada en el servidor (METAAPI_TOKEN).');
-    if (!data.login || !data.server || !data.password) throw new HttpError(400, 'Login, servidor y contraseña son obligatorios');
-    try {
-      metaapiId = await metaapi.createAccount({ login: data.login, password: data.password, server: data.server, name: data.name });
-    } catch (err) {
-      throw new HttpError(err.status === 202 ? 409 : 400, `MetaApi: ${err.message}`);
-    }
+  if (!metaapi.metaapiEnabled()) throw new HttpError(503, 'La conexión con servidores MT5 todavía no está activada en TradeStreak.');
+  if (!data.login || !data.server || !data.password) throw new HttpError(400, 'Login, servidor y contraseña son obligatorios');
+  let metaapiId;
+  try {
+    metaapiId = await metaapi.createAccount({ login: data.login, password: data.password, server: data.server, name: data.name });
+  } catch (err) {
+    throw new HttpError(err.status === 202 ? 409 : 400, `MetaApi: ${err.message}`);
   }
 
   const { lastInsertRowid } = db
-    .prepare(`INSERT INTO accounts (user_id, name, connection_type, broker, server, login, currency, sync_token, metaapi_account_id, status)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-    .run(
-      req.userId, data.name, data.connection_type, data.broker ?? null, data.server ?? null, data.login ?? null,
-      (data.currency || 'USD').toUpperCase(), data.connection_type === 'ea' ? newToken() : null, metaapiId,
-      data.connection_type === 'import' ? 'connected' : 'pending',
-    );
+    .prepare(`INSERT INTO accounts (user_id, name, connection_type, broker, server, login, currency, metaapi_account_id, status)
+              VALUES (?, ?, 'metaapi', ?, ?, ?, ?, ?, 'pending')`)
+    .run(req.userId, data.name, data.broker ?? null, data.server, data.login, (data.currency || 'USD').toUpperCase(), metaapiId);
   res.status(201).json({ account: serialize(ownedAccount(req.userId, lastInsertRowid)) });
 });
 
@@ -94,13 +82,6 @@ router.delete('/:id', async (req, res) => {
   res.status(204).end();
 });
 
-router.post('/:id/regenerate-token', (req, res) => {
-  const acc = ownedAccount(req.userId, req.params.id);
-  if (acc.connection_type !== 'ea') throw new HttpError(400, 'Esta cuenta no usa el Expert Advisor');
-  db.prepare('UPDATE accounts SET sync_token = ? WHERE id = ?').run(newToken(), acc.id);
-  res.json({ account: serialize(ownedAccount(req.userId, acc.id)) });
-});
-
 // Importar informe HTML de MT5 o CSV
 router.post('/:id/import', upload.single('file'), (req, res) => {
   const acc = ownedAccount(req.userId, req.params.id);
@@ -121,7 +102,7 @@ router.post('/:id/import', upload.single('file'), (req, res) => {
 // Sincronizar ahora (MetaApi)
 router.post('/:id/sync', async (req, res) => {
   const acc = ownedAccount(req.userId, req.params.id);
-  if (acc.connection_type !== 'metaapi') throw new HttpError(400, 'Las cuentas con Expert Advisor se sincronizan solas desde MT5');
+  if (acc.connection_type !== 'metaapi') throw new HttpError(400, 'Esta cuenta no está conectada a un servidor MT5');
   if (!metaapi.metaapiEnabled()) throw new HttpError(400, 'MetaApi no está configurado en el servidor');
   try {
     const info = await metaapi.getAccount(acc.metaapi_account_id);

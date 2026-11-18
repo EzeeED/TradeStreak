@@ -6,7 +6,7 @@ import { Button, ErrorBox, Field, Input } from '../components/ui.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const FEATURES = [
-  { icon: PlugZap, title: 'Conecta tu MT5', text: 'Sincroniza automáticamente con un Expert Advisor, MetaApi o importando tu informe.' },
+  { icon: PlugZap, title: 'Conecta tu MT5', text: 'Solo con tu login, servidor y contraseña de inversor. Sin instalar nada.' },
   { icon: LineChart, title: 'Analiza cada trade', text: 'Win rate, profit factor, drawdown, rendimiento por símbolo, hora y día.' },
   { icon: Flame, title: 'Construye rachas', text: 'Diario, etiquetas, errores y tu TradeStreak Score para mejorar con disciplina.' },
 ];

@@ -49,7 +49,7 @@ function score(m) {
     profitFactor: clamp(m.profitFactor === null ? 100 : (m.profitFactor / 2.5) * 100), // 2.5+ = 100
     winLossRatio: clamp(m.avgWinLossRatio === null ? 100 : (m.avgWinLossRatio / 2) * 100), // 2+ = 100
     recovery: clamp(m.maxDrawdown === 0 ? 100 : (m.netPnl / Math.abs(m.maxDrawdown) / 3) * 100), // 3x DD = 100
-    consistency: clamp(m.dayWinRate),                                  // % días verdes
+    consistency: clamp(m.dayWinRate),                                  // % días positivos
     discipline: clamp(100 - m.maxLossStreak * 12),                     // penaliza rachas perdedoras largas
   };
   const weights = { winRate: 0.15, profitFactor: 0.25, winLossRatio: 0.2, recovery: 0.15, consistency: 0.15, discipline: 0.1 };

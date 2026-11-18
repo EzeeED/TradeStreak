@@ -2,7 +2,8 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { createApp } from '../src/app.js';
-import { buildTrade, normalizeDeal } from '../src/lib/mt5.js';
+import { buildTrade, normalizeDeal, ingestDeals } from '../src/lib/mt5.js';
+import { db } from '../src/db.js';
 import { parseMt5HtmlReport } from '../src/lib/importers.js';
 
 let server, base, token;
@@ -53,7 +54,7 @@ test('parsea informe HTML de MT5 ignorando órdenes y celdas ocultas', () => {
   assert.equal(trades[1].open_time, '2024-03-05T14:00:00');
 });
 
-test('flujo completo: registro, cuenta EA, sync, stats, diario', async () => {
+test('flujo completo: registro, cuenta, deals, diario, stats', async () => {
   let r = await api('/api/auth/register', { method: 'POST', body: { name: 'Ana', email: 'ana@test.com', password: 'supersecreta' } });
   assert.equal(r.status, 201);
   token = r.data.token;
@@ -61,33 +62,23 @@ test('flujo completo: registro, cuenta EA, sync, stats, diario', async () => {
   r = await api('/api/auth/register', { method: 'POST', body: { name: 'Ana', email: 'ana@test.com', password: 'supersecreta' } });
   assert.equal(r.status, 409);
 
-  r = await api('/api/accounts', { method: 'POST', body: { name: 'FTMO 100k', connection_type: 'ea' } });
-  assert.equal(r.status, 201);
-  const acc = r.data.account;
-  assert.match(acc.sync_token, /^ts_/);
+  // Sin METAAPI_TOKEN la conexión por servidor está desactivada
+  r = await api('/api/accounts', { method: 'POST', body: { name: 'FTMO', login: '123', server: 'FTMO-Demo', password: 'x' } });
+  assert.equal(r.status, 503);
 
-  // El EA hace ping y luego envía deals
-  r = await api('/api/sync/mt5', { auth: false, headers: { 'x-sync-token': acc.sync_token } });
-  assert.equal(r.data.last_deal_time, 0);
-
+  // Simulamos una cuenta conectada por servidor recibiendo deals de MT5
+  const userId = db.prepare('SELECT id FROM users WHERE email = ?').get('ana@test.com').id;
+  const accId = Number(db.prepare("INSERT INTO accounts (user_id, name, connection_type, login, status) VALUES (?, 'FTMO 100k', 'metaapi', '51234567', 'connected')").run(userId).lastInsertRowid);
   const deals = [
-    { ticket: 10, position_id: 100, time: 1709547301, type: 0, entry: 0, symbol: 'EURUSD', volume: 1, price: 1.1, commission: -3 },
-    { ticket: 11, position_id: 100, time: 1709550000, type: 1, entry: 1, symbol: 'EURUSD', volume: 1, price: 1.102, profit: 200, commission: -3 },
-    { ticket: 12, position_id: 101, time: 1709636400, type: 1, entry: 0, symbol: 'XAUUSD', volume: 0.1, price: 2100 },
-    { ticket: 13, position_id: 101, time: 1709640000, type: 0, entry: 1, symbol: 'XAUUSD', volume: 0.1, price: 2105, profit: -50 },
-    { ticket: 14, position_id: 102, time: 1709722800, type: 0, entry: 0, symbol: 'NAS100', volume: 1, price: 18000 },
-    { ticket: 9, time: 1709500000, type: 2, profit: 10000 },
+    { id: '10', positionId: '100', brokerTime: '2024-03-04 10:15:01.000', type: 'DEAL_TYPE_BUY', entryType: 'DEAL_ENTRY_IN', symbol: 'EURUSD', volume: 1, price: 1.1, commission: -3 },
+    { id: '11', positionId: '100', brokerTime: '2024-03-04 11:00:00.000', type: 'DEAL_TYPE_SELL', entryType: 'DEAL_ENTRY_OUT', symbol: 'EURUSD', volume: 1, price: 1.102, profit: 200, commission: -3 },
+    { id: '12', positionId: '101', brokerTime: '2024-03-05 11:00:00.000', type: 'DEAL_TYPE_SELL', entryType: 'DEAL_ENTRY_IN', symbol: 'XAUUSD', volume: 0.1, price: 2100 },
+    { id: '13', positionId: '101', brokerTime: '2024-03-05 12:00:00.000', type: 'DEAL_TYPE_BUY', entryType: 'DEAL_ENTRY_OUT', symbol: 'XAUUSD', volume: 0.1, price: 2105, profit: -50 },
+    { id: '14', positionId: '102', brokerTime: '2024-03-06 11:00:00.000', type: 'DEAL_TYPE_BUY', entryType: 'DEAL_ENTRY_IN', symbol: 'NAS100', volume: 1, price: 18000 },
+    { id: '9', brokerTime: '2024-03-01 09:00:00.000', type: 'DEAL_TYPE_BALANCE', profit: 10000 },
   ];
-  const payload = { account: { login: 51234567, server: 'Demo-Server', company: 'Demo Broker', currency: 'USD', balance: 10144, equity: 10150 }, deals };
-  r = await api('/api/sync/mt5', { method: 'POST', auth: false, headers: { 'x-sync-token': acc.sync_token }, body: payload });
-  assert.equal(r.status, 200);
-  assert.equal(r.data.trades, 3);
-  // Reenviar es idempotente
-  r = await api('/api/sync/mt5', { method: 'POST', auth: false, headers: { 'x-sync-token': acc.sync_token }, body: payload });
-  assert.equal(r.status, 200);
-
-  r = await api('/api/sync/mt5', { method: 'POST', auth: false, headers: { 'x-sync-token': 'ts_malo' }, body: payload });
-  assert.equal(r.status, 401);
+  assert.equal(ingestDeals(accId, deals).trades, 3);
+  ingestDeals(accId, deals); // idempotente
 
   r = await api('/api/trades');
   assert.equal(r.data.total, 3);
@@ -97,7 +88,7 @@ test('flujo completo: registro, cuenta EA, sync, stats, diario', async () => {
   // Notas y tags del diario sobreviven a una nueva sincronización
   r = await api(`/api/trades/${eurusd.id}`, { method: 'PATCH', body: { notes: 'Buen trade', tags: ['A+', 'Londres'], setup: 'Breakout', rating: 5 } });
   assert.deepEqual(r.data.trade.tags, ['A+', 'Londres']);
-  await api('/api/sync/mt5', { method: 'POST', auth: false, headers: { 'x-sync-token': acc.sync_token }, body: payload });
+  ingestDeals(accId, deals);
   r = await api(`/api/trades/${eurusd.id}`);
   assert.equal(r.data.trade.notes, 'Buen trade');
   assert.equal(r.data.deals.length, 2);
@@ -113,14 +104,6 @@ test('flujo completo: registro, cuenta EA, sync, stats, diario', async () => {
   assert.equal(r.data.summary.currentStreakType, 'loss');
   assert.ok(r.data.score.total >= 0 && r.data.score.total <= 100);
 
-  // Import HTML
-  r = await api('/api/accounts', { method: 'POST', body: { name: 'Import', connection_type: 'import' } });
-  const fd = new FormData();
-  fd.append('file', new Blob([fs.readFileSync(new URL('./fixtures/report.html', import.meta.url))]), 'report.html');
-  r = await api(`/api/accounts/${r.data.account.id}/import`, { method: 'POST', body: fd });
-  assert.equal(r.status, 200);
-  assert.equal(r.data.imported, 2);
-
   // Diario
   r = await api('/api/journal/2024-03-04', { method: 'PUT', body: { content: 'Día disciplinado', mood: 4 } });
   assert.equal(r.data.entry.mood, 4);
@@ -129,7 +112,7 @@ test('flujo completo: registro, cuenta EA, sync, stats, diario', async () => {
   const other = await api('/api/auth/register', { method: 'POST', body: { name: 'Bob', email: 'bob@test.com', password: 'otraclave123' }, auth: false });
   const saved = token;
   token = other.data.token;
-  r = await api(`/api/accounts/${acc.id}`);
+  r = await api(`/api/accounts/${accId}`);
   assert.equal(r.status, 404);
   r = await api(`/api/trades/${eurusd.id}`);
   assert.equal(r.status, 404);

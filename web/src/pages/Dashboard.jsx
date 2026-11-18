@@ -14,7 +14,7 @@ function StreakCard({ s }) {
   const items = [
     { label: 'Racha actual', value: s.currentStreak, sub: s.currentStreakType ? `${s.currentStreak === 1 ? 'trade' : 'trades'} ${onWin ? 'ganador' : 'perdedor'}${s.currentStreak === 1 ? '' : 'es'}` : 'sin trades', hot: onWin },
     { label: 'Mejor racha', value: s.maxWinStreak, sub: 'trades ganadores seguidos' },
-    { label: 'Días verdes seguidos', value: s.currentDayStreakType === 'win' ? s.currentDayStreak : 0, sub: `récord: ${s.maxGreenDayStreak} días` },
+    { label: 'Días positivos seguidos', value: s.currentDayStreakType === 'win' ? s.currentDayStreak : 0, sub: `récord: ${s.maxGreenDayStreak} días` },
     { label: 'Peor racha', value: s.maxLossStreak, sub: 'trades perdedores seguidos' },
   ];
   return (
@@ -99,7 +99,7 @@ export default function Dashboard() {
         </div>
         <Stat label="Profit factor" icon={Scale} value={s.profitFactor === null ? '∞' : num(s.profitFactor)} tone={s.profitFactor === null || s.profitFactor >= 1 ? 'text-win' : 'text-loss'} hint={`${money(s.grossProfit, currency, { compact: true })} / ${money(s.grossLoss, currency, { compact: true })}`} />
         <Stat label="Ganancia / pérdida media" icon={Sigma} value={s.avgWinLossRatio === null ? '∞' : num(s.avgWinLossRatio)} hint={<><span className="text-win">{money(s.avgWin, currency)}</span> / <span className="text-loss">{money(s.avgLoss, currency)}</span></>} />
-        <Stat label="Días verdes" icon={CalendarCheck} value={pct(s.dayWinRate)} hint={`${s.greenDays} verdes · ${s.redDays} rojos`} />
+        <Stat label="Días positivos" icon={CalendarCheck} value={pct(s.dayWinRate)} hint={`${s.greenDays} positivos · ${s.redDays} negativos`} />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">

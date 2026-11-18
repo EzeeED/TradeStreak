@@ -25,6 +25,10 @@ export default {
       return app.fetch(request, env, ctx);
     }
 
+    // Fuera de la subruta (p. ej. app.delorrio.com/) o en su raíz: al dashboard.
+    if (base && !url.pathname.startsWith(`${base}/`) && url.pathname !== base) {
+      return Response.redirect(`${url.origin}${base}/dashboard`, 302);
+    }
     if (url.pathname === base || url.pathname === `${base}/`) {
       return Response.redirect(`${url.origin}${base}/dashboard`, 302);
     }

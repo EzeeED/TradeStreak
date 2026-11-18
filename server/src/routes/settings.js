@@ -1,8 +1,8 @@
-import { Router } from 'express';
+import { Hono } from 'hono';
 import { z } from 'zod';
-import { db } from '../db.js';
+import { body, getDb } from './helpers.js';
 
-const router = Router();
+const router = new Hono();
 
 // Diseño del dashboard: lista ordenada de widgets con su ancho (en columnas de 12) y visibilidad.
 const layoutSchema = z
@@ -15,17 +15,20 @@ const layoutSchema = z
   )
   .max(40);
 
-router.get('/', (req, res) => {
-  const row = db.prepare('SELECT dashboard_layout FROM user_settings WHERE user_id = ?').get(req.userId);
-  res.json({ dashboardLayout: row?.dashboard_layout ? JSON.parse(row.dashboard_layout) : null });
+router.get('/', async (c) => {
+  const row = await getDb(c).first('SELECT dashboard_layout FROM user_settings WHERE user_id = ?', [c.get('userId')]);
+  return c.json({ dashboardLayout: row?.dashboard_layout ? JSON.parse(row.dashboard_layout) : null });
 });
 
-router.put('/dashboard', (req, res) => {
-  const layout = req.body.layout === null ? null : layoutSchema.parse(req.body.layout);
-  db.prepare(`INSERT INTO user_settings (user_id, dashboard_layout) VALUES (?, ?)
-              ON CONFLICT (user_id) DO UPDATE SET dashboard_layout = excluded.dashboard_layout, updated_at = datetime('now')`)
-    .run(req.userId, layout ? JSON.stringify(layout) : null);
-  res.json({ dashboardLayout: layout });
+router.put('/dashboard', async (c) => {
+  const input = await body(c);
+  const layout = input.layout === null ? null : layoutSchema.parse(input.layout);
+  await getDb(c).run(
+    `INSERT INTO user_settings (user_id, dashboard_layout) VALUES (?, ?)
+     ON CONFLICT (user_id) DO UPDATE SET dashboard_layout = excluded.dashboard_layout, updated_at = datetime('now')`,
+    [c.get('userId'), layout ? JSON.stringify(layout) : null],
+  );
+  return c.json({ dashboardLayout: layout });
 });
 
 export default router;

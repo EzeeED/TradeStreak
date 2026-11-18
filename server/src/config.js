@@ -1,23 +1,11 @@
-import crypto from 'node:crypto';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-
-if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
-  throw new Error('JWT_SECRET es obligatorio en producción');
+// Configuración a partir de variables de entorno (process.env en Node, bindings en Workers).
+export function makeConfig(env = {}) {
+  if (!env.JWT_SECRET && env.NODE_ENV === 'production') throw new Error('JWT_SECRET es obligatorio en producción');
+  return {
+    // Subruta pública de la app (p. ej. '/app'). Debe coincidir con la usada al compilar la web.
+    basePath: (env.BASE_PATH || '').replace(/\/+$/, ''),
+    jwtSecret: env.JWT_SECRET || 'tradestreak-dev-secret-cambia-esto',
+    // MetaApi: conexión de cuentas MT5 con login/contraseña/servidor.
+    metaapi: { token: env.METAAPI_TOKEN || '', region: env.METAAPI_REGION || 'new-york' },
+  };
 }
-
-export const config = {
-  port: Number(process.env.PORT || 4000),
-  // Subruta pública de la app (p. ej. '/app'). Debe coincidir con la usada al compilar la web.
-  basePath: (process.env.BASE_PATH || '').replace(/\/+$/, ''),
-  dbPath: process.env.DB_PATH || path.join(root, 'data', 'tradestreak.db'),
-  jwtSecret: process.env.JWT_SECRET || crypto.createHash('sha256').update('tradestreak-dev-secret').digest('hex'),
-  // MetaApi (opcional): conecta cuentas MT5 con login/contraseña/servidor.
-  metaapi: {
-    token: process.env.METAAPI_TOKEN || '',
-    region: process.env.METAAPI_REGION || 'new-york',
-  },
-  webDist: path.resolve(root, '..', 'web', 'dist'),
-};

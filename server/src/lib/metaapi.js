@@ -3,18 +3,18 @@
 // (se recomienda la de "investor"/solo lectura) y servidor, sin instalar nada.
 // La contraseña se envía a MetaApi una vez y NUNCA se guarda en TradeStreak.
 
-import crypto from 'node:crypto';
-import { config } from '../config.js';
 
 const PROVISIONING = 'https://mt-provisioning-api-v1.agiliumtrade.agiliumtrade.ai';
-const clientUrl = (region) => `https://mt-client-api-v1.${region || config.metaapi.region}.agiliumtrade.ai`;
+const hex = (n) => [...crypto.getRandomValues(new Uint8Array(n))].map((b) => b.toString(16).padStart(2, '0')).join('');
 
-export const metaapiEnabled = () => Boolean(config.metaapi.token);
+/** Crea un cliente de MetaApi con la configuración { token, region }. */
+export function metaapiClient(cfg) {
+const clientUrl = (region) => `https://mt-client-api-v1.${region || cfg.region}.agiliumtrade.ai`;
 
 async function call(url, { method = 'GET', body, headers = {} } = {}) {
   const res = await fetch(url, {
     method,
-    headers: { 'auth-token': config.metaapi.token, 'content-type': 'application/json', ...headers },
+    headers: { 'auth-token': cfg.token, 'content-type': 'application/json', ...headers },
     body: body ? JSON.stringify(body) : undefined,
   });
   const text = await res.text();
@@ -29,10 +29,10 @@ async function call(url, { method = 'GET', body, headers = {} } = {}) {
 }
 
 /** Registra la cuenta en MetaApi. Devuelve el id de cuenta de MetaApi. */
-export async function createAccount({ login, password, server, name }) {
+async function createAccount({ login, password, server, name }) {
   const { status, data } = await call(`${PROVISIONING}/users/current/accounts`, {
     method: 'POST',
-    headers: { 'transaction-id': crypto.randomBytes(16).toString('hex') },
+    headers: { 'transaction-id': hex(16) },
     body: {
       login: String(login),
       password,
@@ -40,7 +40,7 @@ export async function createAccount({ login, password, server, name }) {
       name: name || `TradeStreak ${login}`,
       platform: 'mt5',
       magic: 0,
-      region: config.metaapi.region,
+      region: cfg.region,
       reliability: 'regular',
     },
   });
@@ -52,11 +52,11 @@ export async function createAccount({ login, password, server, name }) {
   return data.id;
 }
 
-export async function getAccount(id) {
+async function getAccount(id) {
   return (await call(`${PROVISIONING}/users/current/accounts/${id}`)).data;
 }
 
-export async function deleteAccount(id) {
+async function deleteAccount(id) {
   try {
     await call(`${PROVISIONING}/users/current/accounts/${id}`, { method: 'DELETE' });
   } catch (err) {
@@ -64,12 +64,12 @@ export async function deleteAccount(id) {
   }
 }
 
-export async function getAccountInformation(id, region) {
+async function getAccountInformation(id, region) {
   return (await call(`${clientUrl(region)}/users/current/accounts/${id}/account-information`)).data;
 }
 
 /** Descarga todos los deals entre dos fechas, paginando de 1000 en 1000. */
-export async function getHistoryDeals(id, region, from, to = new Date()) {
+async function getHistoryDeals(id, region, from, to = new Date()) {
   const all = [];
   for (let offset = 0; ; offset += 1000) {
     const url = `${clientUrl(region)}/users/current/accounts/${id}/history-deals/time/${from.toISOString()}/${to.toISOString()}?offset=${offset}&limit=1000`;
@@ -79,4 +79,7 @@ export async function getHistoryDeals(id, region, from, to = new Date()) {
     if (page.length < 1000) break;
   }
   return all;
+}
+
+return { enabled: Boolean(cfg.token), createAccount, getAccount, deleteAccount, getAccountInformation, getHistoryDeals };
 }

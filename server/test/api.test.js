@@ -1,16 +1,20 @@
-import { test, before, after } from 'node:test';
+import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { createApp } from '../src/app.js';
+import { makeConfig } from '../src/config.js';
+import { openSqlite } from '../src/db/sqlite.js';
 import { buildTrade, normalizeDeal, ingestDeals } from '../src/lib/mt5.js';
-import { db } from '../src/db.js';
 import { parseMt5HtmlReport } from '../src/lib/importers.js';
+import { hashPassword, verifyPassword } from '../src/auth.js';
 
-let server, base, token;
+const db = openSqlite(':memory:');
+const app = createApp({ resolve: () => ({ db, config: makeConfig({}) }) });
+let token;
 
 async function api(path, { method = 'GET', body, headers = {}, auth = true } = {}) {
   const isForm = body instanceof FormData;
-  const res = await fetch(base + path, {
+  const res = await app.request(path, {
     method,
     headers: { ...(auth && token ? { authorization: `Bearer ${token}` } : {}), ...(body && !isForm ? { 'content-type': 'application/json' } : {}), ...headers },
     body: isForm ? body : body ? JSON.stringify(body) : undefined,
@@ -19,12 +23,11 @@ async function api(path, { method = 'GET', body, headers = {}, auth = true } = {
   return { status: res.status, data: text ? JSON.parse(text) : null };
 }
 
-before(async () => {
-  server = createApp().listen(0);
-  await new Promise((r) => server.once('listening', r));
-  base = `http://127.0.0.1:${server.address().port}`;
+test('contraseñas con PBKDF2', async () => {
+  const h = await hashPassword('secreto123');
+  assert.ok(await verifyPassword('secreto123', h));
+  assert.ok(!(await verifyPassword('otra', h)));
 });
-after(() => server.close());
 
 test('buildTrade agrupa deals de entrada y salida parcial', () => {
   const deals = [
@@ -67,8 +70,8 @@ test('flujo completo: registro, cuenta, deals, diario, stats', async () => {
   assert.equal(r.status, 503);
 
   // Simulamos una cuenta conectada por servidor recibiendo deals de MT5
-  const userId = db.prepare('SELECT id FROM users WHERE email = ?').get('ana@test.com').id;
-  const accId = Number(db.prepare("INSERT INTO accounts (user_id, name, connection_type, login, status) VALUES (?, 'FTMO 100k', 'metaapi', '51234567', 'connected')").run(userId).lastInsertRowid);
+  const userId = (await db.first('SELECT id FROM users WHERE email = ?', ['ana@test.com'])).id;
+  const accId = (await db.run("INSERT INTO accounts (user_id, name, connection_type, login, status) VALUES (?, 'FTMO 100k', 'metaapi', '51234567', 'connected')", [userId])).lastId;
   const deals = [
     { id: '10', positionId: '100', brokerTime: '2024-03-04 10:15:01.000', type: 'DEAL_TYPE_BUY', entryType: 'DEAL_ENTRY_IN', symbol: 'EURUSD', volume: 1, price: 1.1, commission: -3 },
     { id: '11', positionId: '100', brokerTime: '2024-03-04 11:00:00.000', type: 'DEAL_TYPE_SELL', entryType: 'DEAL_ENTRY_OUT', symbol: 'EURUSD', volume: 1, price: 1.102, profit: 200, commission: -3 },
@@ -77,8 +80,8 @@ test('flujo completo: registro, cuenta, deals, diario, stats', async () => {
     { id: '14', positionId: '102', brokerTime: '2024-03-06 11:00:00.000', type: 'DEAL_TYPE_BUY', entryType: 'DEAL_ENTRY_IN', symbol: 'NAS100', volume: 1, price: 18000 },
     { id: '9', brokerTime: '2024-03-01 09:00:00.000', type: 'DEAL_TYPE_BALANCE', profit: 10000 },
   ];
-  assert.equal(ingestDeals(accId, deals).trades, 3);
-  ingestDeals(accId, deals); // idempotente
+  assert.equal((await ingestDeals(db, accId, deals)).trades, 3);
+  await ingestDeals(db, accId, deals); // idempotente
 
   r = await api('/api/trades');
   assert.equal(r.data.total, 3);
@@ -88,7 +91,7 @@ test('flujo completo: registro, cuenta, deals, diario, stats', async () => {
   // Notas y tags del diario sobreviven a una nueva sincronización
   r = await api(`/api/trades/${eurusd.id}`, { method: 'PATCH', body: { notes: 'Buen trade', tags: ['A+', 'Londres'], setup: 'Breakout', rating: 5 } });
   assert.deepEqual(r.data.trade.tags, ['A+', 'Londres']);
-  ingestDeals(accId, deals);
+  await ingestDeals(db, accId, deals);
   r = await api(`/api/trades/${eurusd.id}`);
   assert.equal(r.data.trade.notes, 'Buen trade');
   assert.equal(r.data.deals.length, 2);
@@ -129,8 +132,27 @@ test('flujo completo: registro, cuenta, deals, diario, stats', async () => {
   assert.equal(r.status, 404);
   token = saved;
 
-  // Demo
+  // Demo e import de informe HTML sobre esa cuenta
   r = await api('/api/accounts/demo', { method: 'POST' });
   assert.equal(r.status, 201);
   assert.ok(r.data.account.trade_count > 50);
+  const fd = new FormData();
+  fd.append('file', new Blob([fs.readFileSync(new URL('./fixtures/report.html', import.meta.url))]), 'report.html');
+  r = await api(`/api/accounts/${r.data.account.id}/import`, { method: 'POST', body: fd });
+  assert.equal(r.status, 200);
+  assert.equal(r.data.imported, 2);
+
+  // Rutas protegidas sin token
+  const saved2 = token;
+  token = null;
+  r = await api('/api/accounts');
+  assert.equal(r.status, 401);
+  r = await api('/api/stats');
+  assert.equal(r.status, 401);
+  token = saved2;
+
+  // Borrar una cuenta elimina sus trades
+  r = await api(`/api/accounts/${accId}`, { method: 'DELETE' });
+  assert.equal(r.status, 204);
+  assert.equal((await db.first('SELECT COUNT(*) AS n FROM trades WHERE account_id = ?', [accId])).n, 0);
 });

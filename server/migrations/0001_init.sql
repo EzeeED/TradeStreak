@@ -1,11 +1,4 @@
-import { DatabaseSync } from 'node:sqlite';
-import fs from 'node:fs';
-import path from 'node:path';
-import { config } from './config.js';
-
-const SCHEMA = `
-PRAGMA journal_mode = WAL;
-PRAGMA foreign_keys = ON;
+-- Esquema de TradeStreak (SQLite / Cloudflare D1)
 
 CREATE TABLE IF NOT EXISTS users (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -105,25 +98,3 @@ CREATE TABLE IF NOT EXISTS journal_entries (
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
   UNIQUE (user_id, date)
 );
-`;
-
-export function openDb(file = config.dbPath) {
-  if (file !== ':memory:') fs.mkdirSync(path.dirname(file), { recursive: true });
-  const db = new DatabaseSync(file);
-  db.exec(SCHEMA);
-  return db;
-}
-
-export const db = openDb(process.env.NODE_ENV === 'test' ? ':memory:' : config.dbPath);
-
-export function transaction(fn) {
-  db.exec('BEGIN');
-  try {
-    const result = fn();
-    db.exec('COMMIT');
-    return result;
-  } catch (err) {
-    db.exec('ROLLBACK');
-    throw err;
-  }
-}

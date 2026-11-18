@@ -10,7 +10,9 @@
     "dev": "concurrently -n api,web -c cyan,magenta \"npm run dev -w server\" \"npm run dev -w web\"",
     "build": "npm run build -w web",
     "start": "npm run start -w server",
-    "test": "npm test -w server"
+    "test": "npm test -w server",
+    "build:cf": "BASE_PATH=/app npm run build -w @tradestreak/web && node server/scripts/embed-assets.mjs web/dist /app",
+    "deploy:cf": "npm run build:cf && cd server && npx wrangler d1 migrations apply tradestreak --remote && npx wrangler deploy"
   },
   "devDependencies": {
     "concurrently": "^10.0.7"

@@ -4,8 +4,6 @@
 // (DEAL_ENTRY_IN) y uno o más de salida (DEAL_ENTRY_OUT / OUT_BY). Todos comparten
 // el mismo position_id. Aquí agrupamos esos deals en un trade por posición.
 
-import { db, transaction } from '../db.js';
-
 const DEAL_TYPES = {
   0: 'buy', 1: 'sell', 2: 'balance', 3: 'credit', 4: 'charge', 5: 'correction',
   6: 'bonus', 7: 'commission', 8: 'commission', 9: 'commission', 10: 'commission',
@@ -130,60 +128,66 @@ export function buildTrade(positionId, deals) {
   };
 }
 
-const upsertTradeStmt = () =>
-  db.prepare(`
-    INSERT INTO trades (account_id, position_id, symbol, side, status, volume, open_time, close_time,
-      entry_price, exit_price, sl, tp, profit, commission, swap, net_profit, duration_sec)
-    VALUES (:account_id, :position_id, :symbol, :side, :status, :volume, :open_time, :close_time,
-      :entry_price, :exit_price, :sl, :tp, :profit, :commission, :swap, :net_profit, :duration_sec)
-    ON CONFLICT (account_id, position_id) DO UPDATE SET
-      symbol = excluded.symbol, side = excluded.side, status = excluded.status, volume = excluded.volume,
-      open_time = excluded.open_time, close_time = excluded.close_time, entry_price = excluded.entry_price,
-      exit_price = excluded.exit_price, sl = excluded.sl, tp = excluded.tp, profit = excluded.profit,
-      commission = excluded.commission, swap = excluded.swap, net_profit = excluded.net_profit,
-      duration_sec = excluded.duration_sec`);
+const TRADE_COLS = ['account_id', 'position_id', 'symbol', 'side', 'status', 'volume', 'open_time', 'close_time',
+  'entry_price', 'exit_price', 'sl', 'tp', 'profit', 'commission', 'swap', 'net_profit', 'duration_sec'];
+// Los campos del diario (notas, tags, setup...) no se tocan al actualizar.
+const UPSERT_TRADE = `INSERT INTO trades (${TRADE_COLS.join(', ')}) VALUES (${TRADE_COLS.map(() => '?').join(', ')})
+  ON CONFLICT (account_id, position_id) DO UPDATE SET
+  ${TRADE_COLS.slice(2).map((c) => `${c} = excluded.${c}`).join(', ')}`;
+
+const DEAL_COLS = ['account_id', 'ticket', 'order_id', 'position_id', 'time', 'type', 'entry', 'symbol', 'volume',
+  'price', 'sl', 'tp', 'profit', 'commission', 'swap', 'fee', 'magic', 'comment'];
+const UPSERT_DEAL = `INSERT INTO deals (${DEAL_COLS.join(', ')}) VALUES (${DEAL_COLS.map(() => '?').join(', ')})
+  ON CONFLICT (account_id, ticket) DO UPDATE SET
+  profit = excluded.profit, commission = excluded.commission, swap = excluded.swap, fee = excluded.fee`;
+
+const BATCH = 50; // sentencias por lote (D1 limita el tamaño de cada batch)
+const chunk = (arr, n) => Array.from({ length: Math.ceil(arr.length / n) }, (_, i) => arr.slice(i * n, i * n + n));
+
+const tradeParams = (accountId, t) =>
+  TRADE_COLS.map((c) => (c === 'account_id' ? accountId : t[c] === undefined ? null : t[c]));
 
 /** Inserta trades ya construidos (p. ej. desde el informe HTML), preservando notas/tags. */
-export function upsertTrades(accountId, trades) {
-  const stmt = upsertTradeStmt();
-  return transaction(() => {
-    for (const t of trades) stmt.run({ sl: null, tp: null, duration_sec: null, ...t, account_id: accountId });
-    return trades.length;
-  });
+export async function upsertTrades(db, accountId, trades) {
+  for (const part of chunk(trades, BATCH)) {
+    await db.batch(part.map((t) => [UPSERT_TRADE, tradeParams(accountId, t)]));
+  }
+  return trades.length;
 }
 
 /**
  * Guarda deals (idempotente por ticket) y reconstruye los trades de las posiciones afectadas.
  * Devuelve cuántos deals se guardaron y cuántos trades se reconstruyeron.
  */
-export function ingestDeals(accountId, rawDeals) {
+export async function ingestDeals(db, accountId, rawDeals) {
   const deals = rawDeals.map(normalizeDeal).filter((d) => d.time);
-  const insert = db.prepare(`
-    INSERT INTO deals (account_id, ticket, order_id, position_id, time, type, entry, symbol, volume,
-      price, sl, tp, profit, commission, swap, fee, magic, comment)
-    VALUES (:account_id, :ticket, :order_id, :position_id, :time, :type, :entry, :symbol, :volume,
-      :price, :sl, :tp, :profit, :commission, :swap, :fee, :magic, :comment)
-    ON CONFLICT (account_id, ticket) DO UPDATE SET
-      profit = excluded.profit, commission = excluded.commission, swap = excluded.swap, fee = excluded.fee`);
-  const selectPos = db.prepare('SELECT * FROM deals WHERE account_id = ? AND position_id = ?');
-  const upsert = upsertTradeStmt();
+  const rows = deals.map((d) => ({
+    ...d,
+    account_id: accountId,
+    order_id: d.order_id != null ? String(d.order_id) : null,
+    position_id: d.position_id != null ? String(d.position_id) : null,
+  }));
+  for (const part of chunk(rows, BATCH)) {
+    await db.batch(part.map((d) => [UPSERT_DEAL, DEAL_COLS.map((c) => (d[c] === undefined ? null : d[c]))]));
+  }
 
-  return transaction(() => {
-    let saved = 0;
-    const positions = new Set();
-    for (const d of deals) {
-      const params = { ...d, account_id: accountId, order_id: d.order_id && String(d.order_id), position_id: d.position_id && String(d.position_id) };
-      saved += Number(insert.run(params).changes);
-      if ((d.type === 'buy' || d.type === 'sell') && d.position_id && d.position_id !== '0') positions.add(String(d.position_id));
+  const positions = [...new Set(rows.filter((d) => (d.type === 'buy' || d.type === 'sell') && d.position_id && d.position_id !== '0').map((d) => d.position_id))];
+  const trades = [];
+  for (const ids of chunk(positions, 90)) {
+    const all = await db.all(
+      `SELECT * FROM deals WHERE account_id = ? AND position_id IN (${ids.map(() => '?').join(',')})`,
+      [accountId, ...ids],
+    );
+    const byPos = new Map();
+    for (const d of all) {
+      if (!byPos.has(d.position_id)) byPos.set(d.position_id, []);
+      byPos.get(d.position_id).push(d);
     }
-    let trades = 0;
-    for (const pid of positions) {
-      const trade = buildTrade(pid, selectPos.all(accountId, pid));
-      if (trade) {
-        upsert.run({ ...trade, account_id: accountId });
-        trades++;
-      }
+    for (const [pid, list] of byPos) {
+      const t = buildTrade(pid, list);
+      if (t) trades.push(t);
     }
-    return { received: deals.length, saved, trades };
-  });
+  }
+  await upsertTrades(db, accountId, trades);
+  return { received: deals.length, saved: rows.length, trades: trades.length };
 }

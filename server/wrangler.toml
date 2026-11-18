@@ -1,0 +1,29 @@
+# TradeStreak en Cloudflare: Worker (API) + D1 (base de datos) + Static Assets (web),
+# publicado en delorrio.com/app. Despliegue: `npm run deploy:cf` desde la raíz del repo.
+name = "tradestreak"
+main = "src/worker.js"
+compatibility_date = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = false
+
+routes = [
+  { pattern = "delorrio.com/app", zone_name = "delorrio.com" },
+  { pattern = "delorrio.com/app/*", zone_name = "delorrio.com" },
+]
+
+[vars]
+NODE_ENV = "production"
+BASE_PATH = "/app"
+METAAPI_REGION = "new-york"
+# JWT_SECRET y METAAPI_TOKEN se guardan como secretos: `wrangler secret put <NOMBRE>`
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tradestreak"
+database_id = "0eff7ad9-541e-4be9-9903-35236544bcba"
+migrations_dir = "migrations"
+
+# La web compilada va embebida en el Worker (src/assets.gen.js, generado por `npm run build:cf`).
+
+[observability]
+enabled = true

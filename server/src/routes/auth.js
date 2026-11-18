@@ -1,10 +1,9 @@
-import { Router } from 'express';
-import bcrypt from 'bcryptjs';
+import { Hono } from 'hono';
 import { z } from 'zod';
-import { db } from '../db.js';
-import { signToken, requireAuth, HttpError } from '../auth.js';
+import { signToken, requireAuth, HttpError, hashPassword, verifyPassword } from '../auth.js';
+import { body, getDb } from './helpers.js';
 
-const router = Router();
+const router = new Hono();
 
 const registerSchema = z.object({
   name: z.string().trim().min(1, 'El nombre es obligatorio').max(80),
@@ -14,34 +13,32 @@ const registerSchema = z.object({
 
 const publicUser = (u) => ({ id: u.id, name: u.name, email: u.email, created_at: u.created_at });
 
-router.post('/register', async (req, res) => {
-  const data = registerSchema.parse(req.body);
-  if (db.prepare('SELECT 1 FROM users WHERE email = ?').get(data.email)) {
+router.post('/register', async (c) => {
+  const db = getDb(c);
+  const data = registerSchema.parse(await body(c));
+  if (await db.first('SELECT 1 AS x FROM users WHERE email = ?', [data.email])) {
     throw new HttpError(409, 'Ya existe una cuenta con ese email');
   }
-  const hash = await bcrypt.hash(data.password, 10);
-  const { lastInsertRowid } = db
-    .prepare('INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)')
-    .run(data.name, data.email, hash);
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(lastInsertRowid);
-  res.status(201).json({ token: signToken(user), user: publicUser(user) });
+  const { lastId } = await db.run('INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)', [
+    data.name, data.email, await hashPassword(data.password),
+  ]);
+  const user = await db.first('SELECT * FROM users WHERE id = ?', [lastId]);
+  return c.json({ token: await signToken(user, c.get('config').jwtSecret), user: publicUser(user) }, 201);
 });
 
-router.post('/login', async (req, res) => {
-  const { email, password } = z
-    .object({ email: z.string().trim().toLowerCase(), password: z.string() })
-    .parse(req.body);
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
-  if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+router.post('/login', async (c) => {
+  const { email, password } = z.object({ email: z.string().trim().toLowerCase(), password: z.string() }).parse(await body(c));
+  const user = await getDb(c).first('SELECT * FROM users WHERE email = ?', [email]);
+  if (!user || !(await verifyPassword(password, user.password_hash))) {
     throw new HttpError(401, 'Email o contraseña incorrectos');
   }
-  res.json({ token: signToken(user), user: publicUser(user) });
+  return c.json({ token: await signToken(user, c.get('config').jwtSecret), user: publicUser(user) });
 });
 
-router.get('/me', requireAuth, (req, res) => {
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.userId);
+router.get('/me', requireAuth, async (c) => {
+  const user = await getDb(c).first('SELECT * FROM users WHERE id = ?', [c.get('userId')]);
   if (!user) throw new HttpError(401, 'Usuario no encontrado');
-  res.json({ user: publicUser(user) });
+  return c.json({ user: publicUser(user) });
 });
 
 export default router;

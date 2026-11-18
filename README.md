@@ -17,7 +17,7 @@ Registra tus operaciones automáticamente, analiza tu rendimiento y construye ra
 
 ## Puesta en marcha
 
-Requiere Node.js 22.13 o superior (se usa el SQLite integrado `node:sqlite`, sin dependencias nativas).
+Requiere Node.js 22.13 o superior. En local la base de datos es SQLite (`node:sqlite`); en producción, Cloudflare D1. El mismo backend (Hono) corre en los dos.
 
 ```bash
 npm install
@@ -43,36 +43,37 @@ Las variables de entorno están descritas en `.env.example`.
 
 Las notas y etiquetas que escribas se conservan aunque el trade se vuelva a sincronizar.
 
-## Desplegar en una subruta (p. ej. delorrio.com/app)
+## Despliegue en Cloudflare (delorrio.com/app)
 
-La app puede vivir bajo una subruta definida con `BASE_PATH`. Hay que usar el mismo valor al compilar la web y al arrancar el servidor:
+Producción corre en un Cloudflare Worker con base de datos D1, publicado en `delorrio.com/app/*` (ver `server/wrangler.toml`). La web compilada va embebida en el Worker.
+
+```bash
+export CLOUDFLARE_API_TOKEN=...   # permisos: Workers Scripts, Workers Routes, D1
+npm run deploy:cf                 # compila, aplica migraciones D1 y despliega
+```
+
+Secretos del Worker (una sola vez): `cd server && npx wrangler secret put JWT_SECRET`, y `METAAPI_TOKEN` cuando se active la conexión por servidor.
+
+Para probar el Worker en local: `npm run build:cf`, luego en `server/` crea `.dev.vars` con `JWT_SECRET=...`, ejecuta `npx wrangler d1 migrations apply tradestreak --local` y `npm run dev:cf`.
+
+## Desplegar en otro servidor (Node / Docker)
+
+La app también puede correr como servidor Node bajo una subruta definida con `BASE_PATH`. Hay que usar el mismo valor al compilar la web y al arrancar:
 
 ```bash
 BASE_PATH=/app npm run build
 BASE_PATH=/app JWT_SECRET=... METAAPI_TOKEN=... npm start   # http://localhost:4000/app/dashboard
 ```
 
-Con Docker:
-
-```bash
-docker build -t tradestreak --build-arg BASE_PATH=/app .
-docker run -d -p 4000:4000 -v tradestreak-data:/data -e JWT_SECRET=... -e METAAPI_TOKEN=... tradestreak
-```
-
-Después, en el servidor web del dominio, se reenvía `/app/` al contenedor sin quitar el prefijo. Ejemplo con nginx:
-
-```nginx
-location /app/ {
-    proxy_pass http://127.0.0.1:4000;
-    proxy_set_header Host $host;
-    proxy_set_header X-Forwarded-Proto $scheme;
-}
-```
+O con Docker: `docker build -t tradestreak --build-arg BASE_PATH=/app .`
 
 ## Arquitectura
 
 ```
-server/   API Express + SQLite (node:sqlite)
+server/   API Hono: Node (node:sqlite) o Cloudflare Worker (D1)
+  src/worker.js         entrada de Cloudflare Workers
+  src/index.js          entrada de Node
+  migrations/           esquema SQL (compartido por SQLite y D1)
   src/lib/mt5.js        normalización de deals MT5 → trades (agrupados por position_id)
   src/lib/importers.js  parser del informe HTML de MT5 (UTF-16) y de CSV
   src/lib/stats.js      métricas, rachas y TradeStreak Score

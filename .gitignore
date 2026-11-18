@@ -5,3 +5,6 @@ server/data/
 *.db-*
 .env
 .DS_Store
+.wrangler/
+server/src/assets.gen.js
+.dev.vars
